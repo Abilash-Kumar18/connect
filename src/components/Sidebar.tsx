@@ -18,7 +18,13 @@ import {
   RotateCcw,
   LogOut,
   SlidersHorizontal,
+  MessageCircle,
+  Receipt,
+  Calendar,
+  Star,
+  User,
 } from 'lucide-react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useConnect } from '../context/ConnectContext';
 import { ChannelIcon } from './ChannelIcon';
 import { ChannelCategory, Channel } from '../types';
@@ -54,6 +60,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ onOpenNewChannel, onOpenAuth }
   const [showStatusEditor, setShowStatusEditor] = useState(false);
   const [newStatusText, setNewStatusText] = useState(currentUser.statusText);
   const [showUserMenu, setShowUserMenu] = useState(false);
+
+  const navigate = useNavigate();
+  const location = useLocation();
 
   // Filter channels
   const filteredChannels = channels
@@ -112,12 +121,18 @@ export const Sidebar: React.FC<SidebarProps> = ({ onOpenNewChannel, onOpenAuth }
       {/* Top Header: Brand Wordmark & Duo Status */}
       <div className="p-4 border-b border-slate-100 dark:border-slate-800/80">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-indigo-600 to-indigo-500 text-white flex items-center justify-center font-bold text-sm shadow-md shadow-indigo-600/20">
+          <div
+            onClick={() => {
+              navigate('/channels');
+              setIsMobileDrawerOpen(false);
+            }}
+            className="flex items-center gap-2.5 cursor-pointer group"
+          >
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-indigo-600 to-indigo-500 text-white flex items-center justify-center font-bold text-sm shadow-md shadow-indigo-600/20 group-hover:scale-105 transition-transform">
               C
             </div>
             <div>
-              <span className="font-bold tracking-tight font-display text-base text-slate-900 dark:text-white">
+              <span className="font-bold tracking-tight font-display text-base text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
                 CONNECT
               </span>
               <span className="text-[10px] text-slate-400 block font-normal -mt-0.5">
@@ -188,6 +203,71 @@ export const Sidebar: React.FC<SidebarProps> = ({ onOpenNewChannel, onOpenAuth }
             <ArrowRightLeft className="w-3 h-3 text-indigo-500" />
             <span className="hidden sm:inline">{partnerUser.name.split(' ')[0]}</span>
           </button>
+        </div>
+
+        {/* Top Primary Page Navigation (Individual URLs) */}
+        <div className="mt-3 grid grid-cols-5 gap-1 p-1 bg-slate-100 dark:bg-slate-800/80 rounded-2xl">
+          {[
+            {
+              id: 'chat',
+              label: 'Chat',
+              icon: MessageCircle,
+              path: `/channels/${activeChannelId || 'chan_general'}`,
+              isMatch: location.pathname.startsWith('/channels'),
+            },
+            {
+              id: 'expenses',
+              label: 'Bills',
+              icon: Receipt,
+              path: '/expenses',
+              isMatch: location.pathname === '/expenses',
+            },
+            {
+              id: 'meetings',
+              label: 'Meets',
+              icon: Calendar,
+              path: '/meetings',
+              isMatch: location.pathname === '/meetings',
+            },
+            {
+              id: 'notes',
+              label: 'Notes',
+              icon: Star,
+              path: '/notes',
+              isMatch: location.pathname === '/notes',
+            },
+            {
+              id: 'profile',
+              label: 'Pair',
+              icon: User,
+              path: '/profile',
+              isMatch: location.pathname === '/profile',
+            },
+          ].map((item) => {
+            const Icon = item.icon;
+            return (
+              <button
+                key={item.id}
+                onClick={() => {
+                  navigate(item.path);
+                  setIsMobileDrawerOpen(false);
+                }}
+                className={`flex flex-col items-center justify-center py-1.5 px-1 rounded-xl text-[10px] font-semibold transition-all ${
+                  item.isMatch
+                    ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-xs'
+                    : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
+                }`}
+                title={`Navigate to ${item.label} (${item.path})`}
+              >
+                <Icon
+                  className={`w-3.5 h-3.5 mb-0.5 ${
+                    item.isMatch ? 'text-indigo-600 dark:text-indigo-400' : ''
+                  }`}
+                />
+                <span>{item.label}</span>
+              </button>
+            );
+          })}
         </div>
 
         {/* Status editor dropdown */}
@@ -325,11 +405,18 @@ export const Sidebar: React.FC<SidebarProps> = ({ onOpenNewChannel, onOpenAuth }
           </div>
         ) : (
           filteredChannels.map((channel) => {
-            const isActive = channel.id === activeChannelId;
+            const isChannelRoute = location.pathname.startsWith('/channels');
+            const isPathMatch = location.pathname === `/channels/${channel.id}`;
+            const isActive = isPathMatch || (isChannelRoute && channel.id === activeChannelId);
+
             return (
               <div
                 key={channel.id}
-                onClick={() => setActiveChannelId(channel.id)}
+                onClick={() => {
+                  setActiveChannelId(channel.id);
+                  navigate(`/channels/${channel.id}`);
+                  setIsMobileDrawerOpen(false);
+                }}
                 className={`relative group p-2.5 rounded-2xl cursor-pointer transition-all duration-150 flex items-start gap-3 ${
                   isActive
                     ? 'bg-indigo-50/80 dark:bg-indigo-950/40 border border-indigo-200/80 dark:border-indigo-800/60 shadow-xs'

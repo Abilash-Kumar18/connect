@@ -4,23 +4,34 @@
  */
 
 import React, { useState } from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ConnectProvider, useConnect } from './context/ConnectContext';
-import { SplashView } from './components/SplashView';
 import { Sidebar } from './components/Sidebar';
-import { ChatPane } from './components/ChatPane';
 import { NewChannelModal } from './components/NewChannelModal';
 import { ExpenseModal } from './components/ExpenseModal';
 import { MeetingModal } from './components/MeetingModal';
 import { ExpenseSummaryModal } from './components/ExpenseSummaryModal';
 import { AuthModal } from './components/AuthModal';
 
-function MainLayout() {
-  const { isAuthenticated } = useConnect();
+import { ChannelPage } from './pages/ChannelPage';
+import { ExpensesPage } from './pages/ExpensesPage';
+import { MeetingsPage } from './pages/MeetingsPage';
+import { NotesPage } from './pages/NotesPage';
+import { ProfilePage } from './pages/ProfilePage';
+import { SplashPage } from './pages/SplashPage';
 
-  // Splash screen state (shown once on first visit)
-  const [showSplash, setShowSplash] = useState(() => {
-    return !sessionStorage.getItem('connect_splash_seen');
-  });
+function RootRedirect() {
+  const { activeChannelId } = useConnect();
+  const hasSeenSplash = Boolean(sessionStorage.getItem('connect_splash_seen'));
+
+  if (!hasSeenSplash) {
+    return <SplashPage />;
+  }
+  return <Navigate to={`/channels/${activeChannelId || 'chan_general'}`} replace />;
+}
+
+function MainWorkspaceLayout() {
+  const { isAuthenticated, activeChannelId } = useConnect();
 
   // Modal open states
   const [isNewChannelOpen, setIsNewChannelOpen] = useState(false);
@@ -29,37 +40,56 @@ function MainLayout() {
   const [isSummaryOpen, setIsSummaryOpen] = useState(false);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
 
-  const handleEnterApp = () => {
-    sessionStorage.setItem('connect_splash_seen', 'true');
-    setShowSplash(false);
-  };
-
   return (
     <div className="flex h-screen w-screen overflow-hidden bg-slate-50 dark:bg-slate-950 font-sans antialiased">
-      {/* 1. Animated Splash Entry */}
-      {showSplash && <SplashView onEnter={handleEnterApp} />}
-
-      {/* 2. Authentication Modal (if logged out or prompted) */}
+      {/* Authentication Modal (if logged out) */}
       {!isAuthenticated && <AuthModal isOpen={true} />}
 
-      {/* 3. Main Dual-Pane Workspace */}
+      {/* Main Dual-Pane Workspace */}
       <div className="flex flex-1 w-full h-full overflow-hidden">
-        {/* Left Navigation Sidebar (Desktop + Mobile Slide-over Drawer) */}
+        {/* Left Navigation Sidebar */}
         <Sidebar
           onOpenNewChannel={() => setIsNewChannelOpen(true)}
           onOpenAuth={() => setIsAuthOpen(true)}
         />
 
-        {/* Right Conversation Stream */}
-        <ChatPane
-          onOpenExpenseModal={() => setIsExpenseOpen(true)}
-          onOpenMeetingModal={() => setIsMeetingOpen(true)}
-          onOpenSummaryModal={() => setIsSummaryOpen(true)}
-          onOpenNewChannelModal={() => setIsNewChannelOpen(true)}
-        />
+        {/* Right Active Route Pane */}
+        <main className="flex-1 h-full overflow-hidden flex flex-col min-w-0">
+          <Routes>
+            <Route
+              path="/channels"
+              element={<Navigate to={`/channels/${activeChannelId || 'chan_general'}`} replace />}
+            />
+            <Route
+              path="/channels/:channelId"
+              element={
+                <ChannelPage
+                  onOpenExpenseModal={() => setIsExpenseOpen(true)}
+                  onOpenMeetingModal={() => setIsMeetingOpen(true)}
+                  onOpenSummaryModal={() => setIsSummaryOpen(true)}
+                  onOpenNewChannelModal={() => setIsNewChannelOpen(true)}
+                />
+              }
+            />
+            <Route
+              path="/expenses"
+              element={<ExpensesPage onOpenExpenseModal={() => setIsExpenseOpen(true)} />}
+            />
+            <Route
+              path="/meetings"
+              element={<MeetingsPage onOpenMeetingModal={() => setIsMeetingOpen(true)} />}
+            />
+            <Route path="/notes" element={<NotesPage />} />
+            <Route path="/profile" element={<ProfilePage />} />
+            <Route
+              path="*"
+              element={<Navigate to={`/channels/${activeChannelId || 'chan_general'}`} replace />}
+            />
+          </Routes>
+        </main>
       </div>
 
-      {/* 4. Global Modals */}
+      {/* Global Modals */}
       <NewChannelModal
         isOpen={isNewChannelOpen}
         onClose={() => setIsNewChannelOpen(false)}
@@ -93,7 +123,13 @@ function MainLayout() {
 export default function App() {
   return (
     <ConnectProvider>
-      <MainLayout />
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<RootRedirect />} />
+          <Route path="/splash" element={<SplashPage />} />
+          <Route path="/*" element={<MainWorkspaceLayout />} />
+        </Routes>
+      </BrowserRouter>
     </ConnectProvider>
   );
 }

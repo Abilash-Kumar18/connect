@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { X, Plus, Hash } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { useConnect } from '../context/ConnectContext';
 import { ChannelCategory } from '../types';
 import { AVAILABLE_ICONS } from './ChannelIcon';
@@ -21,6 +22,7 @@ const CATEGORIES: { id: ChannelCategory; label: string; desc: string }[] = [
 
 export const NewChannelModal: React.FC<NewChannelModalProps> = ({ isOpen, onClose }) => {
   const { createChannel } = useConnect();
+  const navigate = useNavigate();
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState<ChannelCategory>('general');
@@ -36,7 +38,7 @@ export const NewChannelModal: React.FC<NewChannelModalProps> = ({ isOpen, onClos
       setError('Please provide a channel title.');
       return;
     }
-    createChannel({
+    const newChanId = createChannel({
       name: name.trim(),
       description: description.trim() || `${name} duo channel`,
       category,
@@ -46,6 +48,9 @@ export const NewChannelModal: React.FC<NewChannelModalProps> = ({ isOpen, onClos
     setName('');
     setDescription('');
     onClose();
+    if (newChanId) {
+      navigate(`/channels/${newChanId}`);
+    }
   };
 
   return (
