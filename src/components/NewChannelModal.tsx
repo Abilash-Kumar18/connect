@@ -54,17 +54,17 @@ export const NewChannelModal: React.FC<NewChannelModalProps> = ({ isOpen, onClos
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 backdrop-blur-sm p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
       <motion.div
         initial={{ opacity: 0, scale: 0.95, y: 12 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95 }}
-        className="w-full max-w-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
+        className="w-full max-w-lg bg-[#F7F2EB] dark:bg-[#1E231B] border border-[#EAE2D6] dark:border-[#353E2F] rounded-3xl p-6 shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
       >
-        <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800">
+        <div className="flex items-center justify-between pb-4 border-b border-[#EAE2D6] dark:border-[#353E2F]">
           <div>
             <h3 className="text-lg font-bold font-display text-slate-900 dark:text-white flex items-center gap-2">
-              <Plus className="w-5 h-5 text-indigo-500" />
+              <Plus className="w-5 h-5 text-[#8B9A6E]" />
               Create New Topic Channel
             </h3>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
@@ -73,7 +73,7 @@ export const NewChannelModal: React.FC<NewChannelModalProps> = ({ isOpen, onClos
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+            className="p-1.5 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-[#EEEEEE] dark:hover:bg-[#252C21] transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -95,7 +95,7 @@ export const NewChannelModal: React.FC<NewChannelModalProps> = ({ isOpen, onClos
                   setError('');
                 }}
                 placeholder="e.g. Apartment Groceries, Seminar Prints, Hackathon 2026"
-                className="w-full pl-8 pr-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full pl-8 pr-3.5 py-2.5 rounded-xl border border-[#EAE2D6] dark:border-[#353E2F] bg-white dark:bg-[#252C21] text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#8B9A6E]"
                 autoFocus
               />
             </div>
@@ -112,7 +112,7 @@ export const NewChannelModal: React.FC<NewChannelModalProps> = ({ isOpen, onClos
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="What is this channel dedicated to?"
-              className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full px-3.5 py-2 rounded-xl border border-[#EAE2D6] dark:border-[#353E2F] bg-white dark:bg-[#252C21] text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#8B9A6E]"
             />
           </div>
 
@@ -137,8 +137,8 @@ export const NewChannelModal: React.FC<NewChannelModalProps> = ({ isOpen, onClos
                   }}
                   className={`p-2.5 text-left rounded-xl border text-xs transition-all ${
                     category === cat.id
-                      ? 'border-indigo-500 bg-indigo-50/70 dark:bg-indigo-950/40 text-indigo-950 dark:text-indigo-200 font-semibold'
-                      : 'border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 text-slate-700 dark:text-slate-300 hover:border-slate-300'
+                      ? 'border-[#8B9A6E] bg-[#8B9A6E]/15 text-[#38432E] dark:text-[#EAE2D6] font-semibold ring-1 ring-[#8B9A6E]'
+                      : 'border-[#EAE2D6] dark:border-[#353E2F] bg-white/70 dark:bg-[#252C21]/60 text-slate-700 dark:text-slate-300 hover:border-[#8B9A6E]/50'
                   }`}
                 >
                   <div className="font-medium">{cat.label}</div>
@@ -167,8 +167,8 @@ export const NewChannelModal: React.FC<NewChannelModalProps> = ({ isOpen, onClos
                     title={item.label}
                     className={`h-11 rounded-xl flex items-center justify-center border transition-all ${
                       isSelected
-                        ? 'border-indigo-500 bg-indigo-600 text-white shadow-sm'
-                        : 'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 text-slate-600 dark:text-slate-400 hover:text-indigo-500'
+                        ? 'border-[#8B9A6E] bg-[#8B9A6E] text-white shadow-sm'
+                        : 'border-[#EAE2D6] dark:border-[#353E2F] bg-white/70 dark:bg-[#252C21]/60 text-slate-600 dark:text-slate-400 hover:text-[#8B9A6E] hover:border-[#8B9A6E]'
                     }`}
                   >
                     <Icon className="w-5 h-5" />
@@ -192,8 +192,8 @@ export const NewChannelModal: React.FC<NewChannelModalProps> = ({ isOpen, onClos
                     onClick={() => setCurrency(sym)}
                     className={`w-10 h-9 rounded-xl border text-sm font-semibold transition-all ${
                       currency === sym
-                        ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400'
-                        : 'border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300'
+                        ? 'border-[#8B9A6E] bg-[#8B9A6E]/20 text-[#38432E] dark:text-[#EAE2D6]'
+                        : 'border-[#EAE2D6] dark:border-[#353E2F] bg-white dark:bg-[#252C21] text-slate-700 dark:text-slate-300'
                     }`}
                   >
                     {sym}
@@ -208,13 +208,13 @@ export const NewChannelModal: React.FC<NewChannelModalProps> = ({ isOpen, onClos
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800"
+              className="px-4 py-2.5 rounded-xl border border-[#EAE2D6] dark:border-[#353E2F] text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-[#EEEEEE] dark:hover:bg-[#252C21]"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold transition-all shadow-md shadow-indigo-600/20 active:scale-95"
+              className="px-5 py-2.5 rounded-xl bg-[#8B9A6E] hover:bg-[#79875F] text-white text-xs font-semibold transition-all shadow-md shadow-[#8B9A6E]/20 active:scale-95"
             >
               Create Channel
             </button>

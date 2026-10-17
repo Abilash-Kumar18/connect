@@ -75,16 +75,16 @@ export const ExpenseModal: React.FC<ExpenseModalProps> = ({ isOpen, onClose }) =
   const splitShare = splitType === 'equally' ? (parsedAmount / 2).toFixed(2) : parsedAmount.toFixed(2);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 backdrop-blur-sm p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
       <motion.div
         initial={{ opacity: 0, scale: 0.95, y: 12 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95 }}
-        className="w-full max-w-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-2xl overflow-hidden"
+        className="w-full max-w-md bg-[#F7F2EB] dark:bg-[#1E231B] border border-[#EAE2D6] dark:border-[#353E2F] rounded-3xl p-6 shadow-2xl overflow-hidden"
       >
-        <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+        <div className="flex items-center justify-between pb-3 border-b border-[#EAE2D6] dark:border-[#353E2F]">
           <div className="flex items-center gap-2">
-            <div className="p-2 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400">
+            <div className="p-2 rounded-xl bg-[#8B9A6E]/15 text-[#8B9A6E] dark:text-[#A3B386]">
               <Receipt className="w-5 h-5" />
             </div>
             <div>
@@ -98,7 +98,7 @@ export const ExpenseModal: React.FC<ExpenseModalProps> = ({ isOpen, onClose }) =
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+            className="p-1.5 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-[#EEEEEE] dark:hover:bg-[#252C21] transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -111,7 +111,7 @@ export const ExpenseModal: React.FC<ExpenseModalProps> = ({ isOpen, onClose }) =
               Amount ({currency})
             </label>
             <div className="relative">
-              <span className="absolute left-3.5 top-2.5 text-lg font-bold text-slate-400">
+              <span className="absolute left-3.5 top-2.5 text-lg font-bold text-[#8B9A6E]">
                 {currency}
               </span>
               <input
@@ -124,7 +124,7 @@ export const ExpenseModal: React.FC<ExpenseModalProps> = ({ isOpen, onClose }) =
                   setError('');
                 }}
                 placeholder="0.00"
-                className="w-full pl-9 pr-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-lg font-bold tabular-nums text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                className="w-full pl-9 pr-3.5 py-2.5 rounded-xl border border-[#EAE2D6] dark:border-[#353E2F] bg-white dark:bg-[#252C21] text-lg font-bold tabular-nums text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#8B9A6E]"
                 autoFocus
               />
             </div>
@@ -143,7 +143,7 @@ export const ExpenseModal: React.FC<ExpenseModalProps> = ({ isOpen, onClose }) =
                 setError('');
               }}
               placeholder="e.g. Lab manual color prints, Bistro dinner, Uber ride"
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              className="w-full px-3.5 py-2.5 rounded-xl border border-[#EAE2D6] dark:border-[#353E2F] bg-white dark:bg-[#252C21] text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#8B9A6E]"
             />
           </div>
 
@@ -155,7 +155,7 @@ export const ExpenseModal: React.FC<ExpenseModalProps> = ({ isOpen, onClose }) =
             <select
               value={category}
               onChange={(e) => setCategory(e.target.value)}
-              className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-medium text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              className="w-full px-3.5 py-2 rounded-xl border border-[#EAE2D6] dark:border-[#353E2F] bg-white dark:bg-[#252C21] text-xs font-medium text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#8B9A6E]"
             >
               {EXPENSE_CATEGORIES.map((cat) => (
                 <option key={cat} value={cat}>
@@ -176,8 +176,8 @@ export const ExpenseModal: React.FC<ExpenseModalProps> = ({ isOpen, onClose }) =
                 onClick={() => setPaidBy(currentUser.id)}
                 className={`py-2 px-3 rounded-xl border text-xs font-semibold transition-all flex items-center justify-center gap-2 ${
                   paidBy === currentUser.id
-                    ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300'
-                    : 'border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400'
+                    ? 'border-[#8B9A6E] bg-[#8B9A6E]/20 text-[#3C4731] dark:text-[#EAE2D6] ring-1 ring-[#8B9A6E]'
+                    : 'border-[#EAE2D6] dark:border-[#353E2F] bg-white/60 dark:bg-[#252C21] text-slate-600 dark:text-slate-400'
                 }`}
               >
                 <span>{currentUser.name} (You)</span>
@@ -187,8 +187,8 @@ export const ExpenseModal: React.FC<ExpenseModalProps> = ({ isOpen, onClose }) =
                 onClick={() => setPaidBy(partnerUser.id)}
                 className={`py-2 px-3 rounded-xl border text-xs font-semibold transition-all flex items-center justify-center gap-2 ${
                   paidBy === partnerUser.id
-                    ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300'
-                    : 'border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400'
+                    ? 'border-[#8B9A6E] bg-[#8B9A6E]/20 text-[#3C4731] dark:text-[#EAE2D6] ring-1 ring-[#8B9A6E]'
+                    : 'border-[#EAE2D6] dark:border-[#353E2F] bg-white/60 dark:bg-[#252C21] text-slate-600 dark:text-slate-400'
                 }`}
               >
                 <span>{partnerUser.name}</span>
@@ -201,13 +201,13 @@ export const ExpenseModal: React.FC<ExpenseModalProps> = ({ isOpen, onClose }) =
             <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
               Split Option
             </label>
-            <div className="grid grid-cols-3 gap-1.5 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl">
+            <div className="grid grid-cols-3 gap-1.5 p-1 bg-[#EEEEEE] dark:bg-[#252C21] rounded-xl border border-[#EAE2D6] dark:border-[#353E2F]">
               <button
                 type="button"
                 onClick={() => setSplitType('equally')}
                 className={`py-1.5 px-2 rounded-lg text-[11px] font-semibold transition-all ${
                   splitType === 'equally'
-                    ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm'
+                    ? 'bg-[#8B9A6E] text-white shadow-sm'
                     : 'text-slate-600 dark:text-slate-400'
                 }`}
               >
@@ -218,7 +218,7 @@ export const ExpenseModal: React.FC<ExpenseModalProps> = ({ isOpen, onClose }) =
                 onClick={() => setSplitType('partner_owes_full')}
                 className={`py-1.5 px-2 rounded-lg text-[11px] font-semibold transition-all ${
                   splitType === 'partner_owes_full'
-                    ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm'
+                    ? 'bg-[#8B9A6E] text-white shadow-sm'
                     : 'text-slate-600 dark:text-slate-400'
                 }`}
               >
@@ -229,7 +229,7 @@ export const ExpenseModal: React.FC<ExpenseModalProps> = ({ isOpen, onClose }) =
                 onClick={() => setSplitType('you_owe_full')}
                 className={`py-1.5 px-2 rounded-lg text-[11px] font-semibold transition-all ${
                   splitType === 'you_owe_full'
-                    ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm'
+                    ? 'bg-[#8B9A6E] text-white shadow-sm'
                     : 'text-slate-600 dark:text-slate-400'
                 }`}
               >
@@ -254,13 +254,13 @@ export const ExpenseModal: React.FC<ExpenseModalProps> = ({ isOpen, onClose }) =
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-medium text-slate-700 dark:text-slate-300"
+              className="px-4 py-2 rounded-xl border border-[#EAE2D6] dark:border-[#353E2F] text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-[#EEEEEE] dark:hover:bg-[#252C21]"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold shadow-md shadow-emerald-600/20 active:scale-95"
+              className="px-5 py-2 rounded-xl bg-[#8B9A6E] hover:bg-[#79875F] text-white text-xs font-semibold shadow-md shadow-[#8B9A6E]/20 active:scale-95 transition-all"
             >
               Post Expense Card
             </button>

@@ -1,14 +1,40 @@
 @import "tailwindcss";
 
+@theme {
+  --color-sage: #8B9A6E;
+  --color-sage-hover: #79875F;
+  --color-sage-dark: #586641;
+  --color-sage-light: #F1F4EC;
+  --color-sage-subtle: #E3E9D9;
+
+  --color-cream: #F7F2EB;
+  --color-cream-card: #FFFFFF;
+  --color-cream-surface: #FAF6F0;
+
+  --color-sand: #EAE2D6;
+  --color-sand-hover: #DFD6C7;
+  --color-sand-border: #DFD6C7;
+
+  --color-tint: #EEEEEE;
+  --color-tint-dark: #E2E2E2;
+
+  --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  --font-display: 'Outfit', 'Plus Jakarta Sans', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
 @layer base {
   :root {
-    --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
-    --font-display: 'Outfit', 'Plus Jakarta Sans', system-ui, sans-serif;
-    --font-mono: 'JetBrains Mono', monospace;
+    --palette-sage: #8B9A6E;
+    --palette-cream: #F7F2EB;
+    --palette-sand: #EAE2D6;
+    --palette-tint: #EEEEEE;
   }
 
   body {
     font-family: var(--font-sans);
+    background-color: #F7F2EB;
+    color: #2D3325;
   }
 
   h1, h2, h3, .font-display {
@@ -16,7 +42,7 @@
   }
 }
 
-/* Custom sleek scrollbar */
+/* Custom sleek scrollbar styled in sage / sand */
 ::-webkit-scrollbar {
   width: 5px;
   height: 5px;
@@ -27,20 +53,20 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(148, 163, 184, 0.25);
+  background: rgba(139, 154, 110, 0.35);
   border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(148, 163, 184, 0.45);
+  background: rgba(139, 154, 110, 0.6);
 }
 
 .dark ::-webkit-scrollbar-thumb {
-  background: rgba(148, 163, 184, 0.2);
+  background: rgba(139, 154, 110, 0.3);
 }
 
 .dark ::-webkit-scrollbar-thumb:hover {
-  background: rgba(148, 163, 184, 0.38);
+  background: rgba(139, 154, 110, 0.55);
 }
 
 /* Touch callout prevention on interactive elements */

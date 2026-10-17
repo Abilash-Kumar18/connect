@@ -117,9 +117,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ onOpenNewChannel, onOpenAuth }
   };
 
   const sidebarContent = (
-    <div className="flex flex-col h-full bg-white dark:bg-slate-900 border-r border-slate-200/90 dark:border-slate-800 text-slate-800 dark:text-slate-100 select-none">
+    <div className="flex flex-col h-full bg-[#F7F2EB] dark:bg-[#1E231B] border-r border-[#EAE2D6] dark:border-[#353E2F] text-[#2D3325] dark:text-[#F7F2EB] select-none">
       {/* Top Header: Brand Wordmark & Duo Status */}
-      <div className="p-4 border-b border-slate-100 dark:border-slate-800/80">
+      <div className="p-4 border-b border-[#EAE2D6] dark:border-[#353E2F]">
         <div className="flex items-center justify-between">
           <div
             onClick={() => {
@@ -128,14 +128,14 @@ export const Sidebar: React.FC<SidebarProps> = ({ onOpenNewChannel, onOpenAuth }
             }}
             className="flex items-center gap-2.5 cursor-pointer group"
           >
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-indigo-600 to-indigo-500 text-white flex items-center justify-center font-bold text-sm shadow-md shadow-indigo-600/20 group-hover:scale-105 transition-transform">
+            <div className="w-8 h-8 rounded-xl bg-[#8B9A6E] text-white flex items-center justify-center font-bold text-sm shadow-md shadow-[#8B9A6E]/30 group-hover:scale-105 transition-transform">
               C
             </div>
             <div>
-              <span className="font-bold tracking-tight font-display text-base text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+              <span className="font-bold tracking-tight font-display text-base text-[#2D3325] dark:text-[#F7F2EB] group-hover:text-[#8B9A6E] transition-colors">
                 CONNECT
               </span>
-              <span className="text-[10px] text-slate-400 block font-normal -mt-0.5">
+              <span className="text-[10px] text-[#788566] dark:text-[#B7C2A5] block font-normal -mt-0.5">
                 Duo Context Space
               </span>
             </div>
@@ -145,21 +145,21 @@ export const Sidebar: React.FC<SidebarProps> = ({ onOpenNewChannel, onOpenAuth }
             <button
               onClick={toggleDarkMode}
               title={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
-              className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+              className="p-1.5 rounded-lg text-[#788566] dark:text-[#B7C2A5] hover:text-[#2D3325] dark:hover:text-white hover:bg-[#EAE2D6] dark:hover:bg-[#2A3324] transition-colors"
             >
               {darkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
             </button>
             <button
               onClick={toggleSound}
               title={soundEnabled ? 'Mute sound effects' : 'Enable sound effects'}
-              className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+              className="p-1.5 rounded-lg text-[#788566] dark:text-[#B7C2A5] hover:text-[#2D3325] dark:hover:text-white hover:bg-[#EAE2D6] dark:hover:bg-[#2A3324] transition-colors"
             >
               {soundEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
             </button>
             {/* Mobile close button */}
             <button
               onClick={() => setIsMobileDrawerOpen(false)}
-              className="md:hidden p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800"
+              className="md:hidden p-1.5 rounded-lg text-[#788566] hover:text-[#2D3325] hover:bg-[#EAE2D6] dark:hover:bg-[#2A3324]"
             >
               <X className="w-4 h-4" />
             </button>
@@ -167,7 +167,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ onOpenNewChannel, onOpenAuth }
         </div>
 
         {/* Current User Card & Duo Switcher */}
-        <div className="mt-3.5 p-2.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/70 dark:border-slate-700/60 flex items-center justify-between">
+        <div className="mt-3.5 p-2.5 rounded-2xl bg-[#EAE2D6]/60 dark:bg-[#252C21] border border-[#EAE2D6] dark:border-[#353E2F] flex items-center justify-between">
           <div
             onClick={() => setShowStatusEditor(!showStatusEditor)}
             className="flex items-center gap-2.5 cursor-pointer min-w-0 flex-1 group"
@@ -175,20 +175,20 @@ export const Sidebar: React.FC<SidebarProps> = ({ onOpenNewChannel, onOpenAuth }
             <div className="relative">
               <div
                 className={`w-9 h-9 rounded-full flex items-center justify-center font-bold text-xs text-white ${
-                  currentUser.id === 'alex' ? 'bg-indigo-600' : 'bg-emerald-600'
+                  currentUser.id === 'alex' ? 'bg-[#8B9A6E]' : 'bg-[#67754E]'
                 }`}
               >
                 {currentUser.name[0]}
               </div>
-              <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-white dark:ring-slate-800" />
+              <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-[#8B9A6E] ring-2 ring-[#F7F2EB] dark:ring-[#252C21]" />
             </div>
 
             <div className="min-w-0 flex-1">
-              <div className="text-xs font-semibold text-slate-900 dark:text-white truncate flex items-center gap-1.5">
+              <div className="text-xs font-semibold text-[#2D3325] dark:text-white truncate flex items-center gap-1.5">
                 <span>{currentUser.name}</span>
-                <span className="text-[10px] text-slate-400 font-normal">You</span>
+                <span className="text-[10px] text-[#788566] dark:text-[#A7B395] font-normal">You</span>
               </div>
-              <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate group-hover:text-indigo-500 transition-colors">
+              <p className="text-[11px] text-[#586348] dark:text-[#C5CEB8] truncate group-hover:text-[#8B9A6E] transition-colors">
                 {currentUser.statusText}
               </p>
             </div>
@@ -198,15 +198,15 @@ export const Sidebar: React.FC<SidebarProps> = ({ onOpenNewChannel, onOpenAuth }
           <button
             onClick={handleSwitchUser}
             title={`Switch to view as ${partnerUser.name}`}
-            className="p-1.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-500 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-white dark:hover:bg-slate-700 transition-all flex items-center gap-1 text-[11px] font-medium shrink-0 ml-1"
+            className="p-1.5 rounded-xl border border-[#D8CFC2] dark:border-[#384232] bg-[#F7F2EB] dark:bg-[#1E231B] text-[#586348] dark:text-[#C5CEB8] hover:text-[#8B9A6E] hover:border-[#8B9A6E] transition-all flex items-center gap-1 text-[11px] font-medium shrink-0 ml-1"
           >
-            <ArrowRightLeft className="w-3 h-3 text-indigo-500" />
+            <ArrowRightLeft className="w-3 h-3 text-[#8B9A6E]" />
             <span className="hidden sm:inline">{partnerUser.name.split(' ')[0]}</span>
           </button>
         </div>
 
         {/* Top Primary Page Navigation (Individual URLs) */}
-        <div className="mt-3 grid grid-cols-5 gap-1 p-1 bg-slate-100 dark:bg-slate-800/80 rounded-2xl">
+        <div className="mt-3 grid grid-cols-5 gap-1 p-1 bg-[#EAE2D6] dark:bg-[#252C21] rounded-2xl border border-[#DFD6C7] dark:border-[#353E2F]">
           {[
             {
               id: 'chat',
@@ -254,14 +254,14 @@ export const Sidebar: React.FC<SidebarProps> = ({ onOpenNewChannel, onOpenAuth }
                 }}
                 className={`flex flex-col items-center justify-center py-1.5 px-1 rounded-xl text-[10px] font-semibold transition-all ${
                   item.isMatch
-                    ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-xs'
-                    : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
+                    ? 'bg-[#8B9A6E] text-white shadow-xs'
+                    : 'text-[#586348] dark:text-[#C5CEB8] hover:bg-[#F7F2EB]/60 dark:hover:bg-[#1E231B]'
                 }`}
                 title={`Navigate to ${item.label} (${item.path})`}
               >
                 <Icon
                   className={`w-3.5 h-3.5 mb-0.5 ${
-                    item.isMatch ? 'text-indigo-600 dark:text-indigo-400' : ''
+                    item.isMatch ? 'text-white' : 'text-[#788566] dark:text-[#A7B395]'
                   }`}
                 />
                 <span>{item.label}</span>
@@ -285,19 +285,19 @@ export const Sidebar: React.FC<SidebarProps> = ({ onOpenNewChannel, onOpenAuth }
                 value={newStatusText}
                 onChange={(e) => setNewStatusText(e.target.value)}
                 placeholder="Set status (e.g. In class, Studying, Coding)"
-                className="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                className="w-full px-2.5 py-1.5 rounded-lg border border-[#EAE2D6] dark:border-[#353E2F] bg-white dark:bg-[#1E231B] text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-[#8B9A6E]"
               />
               <div className="flex justify-end gap-1.5 mt-1.5">
                 <button
                   type="button"
                   onClick={() => setShowStatusEditor(false)}
-                  className="px-2 py-1 text-[10px] text-slate-500 hover:text-slate-700"
+                  className="px-2 py-1 text-[10px] text-slate-500 hover:text-slate-700 dark:text-slate-400"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-2.5 py-1 text-[10px] font-semibold bg-indigo-600 text-white rounded-md"
+                  className="px-2.5 py-1 text-[10px] font-semibold bg-[#8B9A6E] hover:bg-[#79875F] text-white rounded-md"
                 >
                   Save
                 </button>
@@ -308,10 +308,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ onOpenNewChannel, onOpenAuth }
       </div>
 
       {/* New Topic Button & Search Bar */}
-      <div className="p-3 space-y-2 border-b border-slate-100 dark:border-slate-800/80">
+      <div className="p-3 space-y-2 border-b border-[#EAE2D6] dark:border-[#353E2F]">
         <button
           onClick={onOpenNewChannel}
-          className="w-full py-2.5 px-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold flex items-center justify-center gap-2 shadow-sm transition-all active:scale-[0.98]"
+          className="w-full py-2.5 px-3.5 rounded-xl bg-[#8B9A6E] hover:bg-[#79875F] text-white text-xs font-semibold flex items-center justify-center gap-2 shadow-sm transition-all active:scale-[0.98]"
         >
           <Plus className="w-4 h-4" />
           <span>New Topic Channel</span>
@@ -319,18 +319,18 @@ export const Sidebar: React.FC<SidebarProps> = ({ onOpenNewChannel, onOpenAuth }
 
         {/* Search */}
         <div className="relative">
-          <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" />
+          <Search className="w-3.5 h-3.5 text-[#788566] dark:text-[#A7B395] absolute left-3 top-2.5" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search channels & topics..."
-            className="w-full pl-8 pr-3 py-1.5 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+            className="w-full pl-8 pr-3 py-1.5 rounded-xl border border-[#DFD6C7] dark:border-[#353E2F] bg-[#EEEEEE] dark:bg-[#252C21] text-xs text-[#2D3325] dark:text-[#F7F2EB] placeholder-[#8F9882] focus:outline-none focus:ring-2 focus:ring-[#8B9A6E]/40"
           />
           {searchQuery && (
             <button
               onClick={() => setSearchQuery('')}
-              className="absolute right-2.5 top-2 text-slate-400 hover:text-slate-600 text-xs"
+              className="absolute right-2.5 top-2 text-[#788566] hover:text-[#2D3325] text-xs"
             >
               ×
             </button>
@@ -343,8 +343,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ onOpenNewChannel, onOpenAuth }
             onClick={() => setChannelFilter('all')}
             className={`px-2.5 py-1 rounded-lg font-medium whitespace-nowrap transition-colors ${
               channelFilter === 'all'
-                ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900'
-                : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
+                ? 'bg-[#8B9A6E] text-white shadow-xs'
+                : 'bg-[#EEEEEE] dark:bg-[#252C21] text-[#586348] dark:text-[#C5CEB8] hover:bg-[#EAE2D6]'
             }`}
           >
             All
@@ -353,8 +353,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ onOpenNewChannel, onOpenAuth }
             onClick={() => setChannelFilter('pinned')}
             className={`px-2.5 py-1 rounded-lg font-medium whitespace-nowrap transition-colors flex items-center gap-1 ${
               channelFilter === 'pinned'
-                ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900'
-                : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
+                ? 'bg-[#8B9A6E] text-white shadow-xs'
+                : 'bg-[#EEEEEE] dark:bg-[#252C21] text-[#586348] dark:text-[#C5CEB8] hover:bg-[#EAE2D6]'
             }`}
           >
             <Pin className="w-3 h-3" />
@@ -364,8 +364,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ onOpenNewChannel, onOpenAuth }
             onClick={() => setChannelFilter('expenses')}
             className={`px-2.5 py-1 rounded-lg font-medium whitespace-nowrap transition-colors ${
               channelFilter === 'expenses'
-                ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900'
-                : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
+                ? 'bg-[#8B9A6E] text-white shadow-xs'
+                : 'bg-[#EEEEEE] dark:bg-[#252C21] text-[#586348] dark:text-[#C5CEB8] hover:bg-[#EAE2D6]'
             }`}
           >
             Expenses
@@ -374,8 +374,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ onOpenNewChannel, onOpenAuth }
             onClick={() => setChannelFilter('college')}
             className={`px-2.5 py-1 rounded-lg font-medium whitespace-nowrap transition-colors ${
               channelFilter === 'college'
-                ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900'
-                : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
+                ? 'bg-[#8B9A6E] text-white shadow-xs'
+                : 'bg-[#EEEEEE] dark:bg-[#252C21] text-[#586348] dark:text-[#C5CEB8] hover:bg-[#EAE2D6]'
             }`}
           >
             College
@@ -384,8 +384,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ onOpenNewChannel, onOpenAuth }
             onClick={() => setChannelFilter('meetings')}
             className={`px-2.5 py-1 rounded-lg font-medium whitespace-nowrap transition-colors ${
               channelFilter === 'meetings'
-                ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900'
-                : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
+                ? 'bg-[#8B9A6E] text-white shadow-xs'
+                : 'bg-[#EEEEEE] dark:bg-[#252C21] text-[#586348] dark:text-[#C5CEB8] hover:bg-[#EAE2D6]'
             }`}
           >
             Meetings
@@ -397,9 +397,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ onOpenNewChannel, onOpenAuth }
       <div className="flex-1 overflow-y-auto px-2 py-2 space-y-1">
         {filteredChannels.length === 0 ? (
           <div className="text-center py-12 px-4">
-            <Layers className="w-8 h-8 text-slate-300 dark:text-slate-700 mx-auto mb-2" />
-            <p className="text-xs font-medium text-slate-500">No channels found</p>
-            <p className="text-[11px] text-slate-400 mt-0.5">
+            <Layers className="w-8 h-8 text-[#A7B395] dark:text-[#4A5539] mx-auto mb-2" />
+            <p className="text-xs font-medium text-[#586348]">No channels found</p>
+            <p className="text-[11px] text-[#8F9882] mt-0.5">
               {searchQuery ? 'Try another keyword' : 'Create a topic above to begin'}
             </p>
           </div>
@@ -419,16 +419,16 @@ export const Sidebar: React.FC<SidebarProps> = ({ onOpenNewChannel, onOpenAuth }
                 }}
                 className={`relative group p-2.5 rounded-2xl cursor-pointer transition-all duration-150 flex items-start gap-3 ${
                   isActive
-                    ? 'bg-indigo-50/80 dark:bg-indigo-950/40 border border-indigo-200/80 dark:border-indigo-800/60 shadow-xs'
-                    : 'hover:bg-slate-100/70 dark:hover:bg-slate-800/50 border border-transparent'
-                } ${channel.isPinned ? 'ring-1 ring-amber-400/20' : ''}`}
+                    ? 'bg-[#EAE2D6] dark:bg-[#2A3324] border border-[#8B9A6E]/70 shadow-xs'
+                    : 'hover:bg-[#EAE2D6]/50 dark:hover:bg-[#252C21] border border-transparent'
+                } ${channel.isPinned ? 'ring-1 ring-[#8B9A6E]/30' : ''}`}
               >
                 {/* Channel Icon Container */}
                 <div
                   className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 transition-colors ${
                     isActive
-                      ? 'bg-indigo-600 text-white shadow-sm'
-                      : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 group-hover:bg-white dark:group-hover:bg-slate-700'
+                      ? 'bg-[#8B9A6E] text-white shadow-xs'
+                      : 'bg-[#EEEEEE] dark:bg-[#252C21] text-[#586348] dark:text-[#C5CEB8] group-hover:bg-[#EAE2D6]'
                   }`}
                 >
                   <ChannelIcon name={channel.icon} className="w-4 h-4" />
@@ -440,18 +440,18 @@ export const Sidebar: React.FC<SidebarProps> = ({ onOpenNewChannel, onOpenAuth }
                     <span
                       className={`text-xs font-semibold truncate ${
                         isActive
-                          ? 'text-indigo-950 dark:text-indigo-200'
-                          : 'text-slate-900 dark:text-white'
+                          ? 'text-[#2D3325] dark:text-white'
+                          : 'text-[#4A5538] dark:text-[#EAE2D6]'
                       }`}
                     >
                       {channel.name}
                     </span>
-                    <span className="text-[10px] text-slate-400 font-mono shrink-0">
+                    <span className="text-[10px] text-[#788566] dark:text-[#A7B395] font-mono shrink-0">
                       {formatRelativeTime(channel.lastMessageTimestamp)}
                     </span>
                   </div>
 
-                  <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate mt-0.5">
+                  <p className="text-[11px] text-[#6B7558] dark:text-[#B7C2A5] truncate mt-0.5">
                     {channel.lastMessageSnippet || channel.description}
                   </p>
                 </div>
@@ -468,16 +468,16 @@ export const Sidebar: React.FC<SidebarProps> = ({ onOpenNewChannel, onOpenAuth }
                     title={channel.isPinned ? 'Unpin channel' : 'Pin channel to top'}
                     className={`p-1 rounded-md transition-opacity ${
                       channel.isPinned
-                        ? 'text-amber-500 opacity-100'
-                        : 'text-slate-400 opacity-0 group-hover:opacity-100 hover:text-slate-600'
+                        ? 'text-[#8B9A6E] opacity-100'
+                        : 'text-[#8F9882] opacity-0 group-hover:opacity-100 hover:text-[#586348]'
                     }`}
                   >
-                    <Pin className={`w-3.5 h-3.5 ${channel.isPinned ? 'fill-amber-500' : ''}`} />
+                    <Pin className={`w-3.5 h-3.5 ${channel.isPinned ? 'fill-[#8B9A6E]' : ''}`} />
                   </button>
 
                   {/* Unread badge */}
                   {channel.unreadCount > 0 && !isActive && (
-                    <span className="w-4 h-4 rounded-full bg-indigo-600 text-white text-[10px] font-bold flex items-center justify-center">
+                    <span className="w-4 h-4 rounded-full bg-[#8B9A6E] text-white text-[10px] font-bold flex items-center justify-center">
                       {channel.unreadCount}
                     </span>
                   )}
@@ -489,24 +489,24 @@ export const Sidebar: React.FC<SidebarProps> = ({ onOpenNewChannel, onOpenAuth }
       </div>
 
       {/* Partner Connection Footer */}
-      <div className="p-3 border-t border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-900/50">
+      <div className="p-3 border-t border-[#EAE2D6] dark:border-[#353E2F] bg-[#EAE2D6]/40 dark:bg-[#252C21]/60">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="relative">
               <div
                 className={`w-7 h-7 rounded-full flex items-center justify-center font-bold text-[11px] text-white ${
-                  partnerUser.id === 'alex' ? 'bg-indigo-600' : 'bg-emerald-600'
+                  partnerUser.id === 'alex' ? 'bg-[#8B9A6E]' : 'bg-[#67754E]'
                 }`}
               >
                 {partnerUser.name[0]}
               </div>
-              <span className="absolute bottom-0 right-0 w-2 h-2 rounded-full bg-emerald-500 ring-1 ring-white dark:ring-slate-900" />
+              <span className="absolute bottom-0 right-0 w-2 h-2 rounded-full bg-[#8B9A6E] ring-1 ring-white dark:ring-[#252C21]" />
             </div>
             <div className="text-[11px]">
-              <span className="font-semibold text-slate-800 dark:text-slate-200 block leading-tight">
+              <span className="font-semibold text-[#2D3325] dark:text-[#EAE2D6] block leading-tight">
                 {partnerUser.name}
               </span>
-              <span className="text-[10px] text-slate-400 truncate block">
+              <span className="text-[10px] text-[#788566] dark:text-[#A7B395] truncate block">
                 {partnerUser.statusText}
               </span>
             </div>
@@ -515,7 +515,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ onOpenNewChannel, onOpenAuth }
           <button
             onClick={resetToDefaults}
             title="Reset sample data"
-            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
+            className="p-1.5 rounded-lg text-[#788566] hover:text-[#2D3325] dark:hover:text-white hover:bg-[#EAE2D6] dark:hover:bg-[#353E2F]"
           >
             <RotateCcw className="w-3.5 h-3.5" />
           </button>

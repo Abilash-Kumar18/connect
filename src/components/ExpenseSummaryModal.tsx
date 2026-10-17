@@ -30,17 +30,17 @@ export const ExpenseSummaryModal: React.FC<ExpenseSummaryModalProps> = ({ isOpen
   const isSettled = Math.abs(summary.netBalance) <= 0.01;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 backdrop-blur-sm p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
       <motion.div
         initial={{ opacity: 0, scale: 0.95, y: 12 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95 }}
-        className="w-full max-w-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
+        className="w-full max-w-lg bg-[#F7F2EB] dark:bg-[#1E231B] border border-[#EAE2D6] dark:border-[#353E2F] rounded-3xl p-6 shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
       >
         {/* Header */}
-        <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+        <div className="flex items-center justify-between pb-3 border-b border-[#EAE2D6] dark:border-[#353E2F]">
           <div className="flex items-center gap-2.5">
-            <div className="p-2.5 rounded-2xl bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400">
+            <div className="p-2.5 rounded-2xl bg-[#8B9A6E]/15 text-[#8B9A6E] dark:text-[#A3B386]">
               <Receipt className="w-5 h-5" />
             </div>
             <div>
@@ -52,20 +52,20 @@ export const ExpenseSummaryModal: React.FC<ExpenseSummaryModalProps> = ({ isOpen
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+            className="p-1.5 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-[#EEEEEE] dark:hover:bg-[#252C21] transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Balance Overview Card */}
-        <div className="my-4 p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/80">
+        <div className="my-4 p-4 rounded-2xl bg-white dark:bg-[#252C21] border border-[#EAE2D6] dark:border-[#353E2F] shadow-xs">
           <div className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-2">
             Net Duo Settlement Status
           </div>
 
           {isSettled ? (
-            <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400">
+            <div className="flex items-center gap-2 text-[#8B9A6E] dark:text-[#A3B386]">
               <CheckCircle className="w-6 h-6" />
               <div>
                 <div className="text-base font-bold">All Settled Up!</div>
@@ -78,7 +78,7 @@ export const ExpenseSummaryModal: React.FC<ExpenseSummaryModalProps> = ({ isOpen
                 <div className="text-xs text-slate-600 dark:text-slate-400">
                   {isAlexOwed ? 'Jordan owes Alex' : 'Alex owes Jordan'}
                 </div>
-                <div className="text-2xl font-bold font-mono tabular-nums text-emerald-600 dark:text-emerald-400">
+                <div className="text-2xl font-bold font-mono tabular-nums text-[#8B9A6E] dark:text-[#A3B386]">
                   {currency}
                   {Math.abs(summary.netBalance).toFixed(2)}
                 </div>
@@ -86,7 +86,7 @@ export const ExpenseSummaryModal: React.FC<ExpenseSummaryModalProps> = ({ isOpen
               <button
                 type="button"
                 onClick={() => settleAllChannelExpenses(activeChannel.id)}
-                className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold shadow-sm active:scale-95 transition-all"
+                className="px-4 py-2 rounded-xl bg-[#8B9A6E] hover:bg-[#79875F] text-white text-xs font-semibold shadow-sm active:scale-95 transition-all"
               >
                 Settle All ({summary.unsettledCount})
               </button>
@@ -94,7 +94,7 @@ export const ExpenseSummaryModal: React.FC<ExpenseSummaryModalProps> = ({ isOpen
           )}
 
           {/* Breakdown stat bars */}
-          <div className="grid grid-cols-2 gap-3 mt-4 pt-3 border-t border-slate-200 dark:border-slate-700">
+          <div className="grid grid-cols-2 gap-3 mt-4 pt-3 border-t border-[#EAE2D6] dark:border-[#353E2F]">
             <div>
               <div className="text-[11px] text-slate-500">Alex Morgan paid</div>
               <div className="text-sm font-semibold tabular-nums text-slate-800 dark:text-slate-200">
@@ -132,19 +132,19 @@ export const ExpenseSummaryModal: React.FC<ExpenseSummaryModalProps> = ({ isOpen
                     key={msg.id}
                     className={`p-3 rounded-2xl border text-xs flex items-center justify-between transition-all ${
                       exp.isSettled
-                        ? 'border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 opacity-60'
-                        : 'border-emerald-200 dark:border-emerald-900/40 bg-emerald-50/20 dark:bg-emerald-950/20'
+                        ? 'border-[#EAE2D6] dark:border-[#353E2F] bg-[#EEEEEE]/40 dark:bg-[#252C21]/40 opacity-60'
+                        : 'border-[#8B9A6E]/30 bg-[#8B9A6E]/10 dark:bg-[#8B9A6E]/15'
                     }`}
                   >
                     <div>
                       <div className="font-semibold text-slate-900 dark:text-white flex items-center gap-1.5">
                         <span>{exp.title}</span>
                         {exp.isSettled ? (
-                          <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
+                          <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-[#EEEEEE] dark:bg-[#2A3125] text-slate-600 dark:text-slate-400">
                             Settled
                           </span>
                         ) : (
-                          <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 font-medium">
+                          <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-[#8B9A6E]/20 text-[#3C4731] dark:text-[#C5D4AD] font-medium">
                             Pending
                           </span>
                         )}
@@ -173,8 +173,8 @@ export const ExpenseSummaryModal: React.FC<ExpenseSummaryModalProps> = ({ isOpen
                         onClick={() => markExpenseSettled(msg.id)}
                         className={`px-2.5 py-1 rounded-lg text-[11px] font-medium border transition-colors ${
                           exp.isSettled
-                            ? 'border-slate-300 dark:border-slate-700 text-slate-500 hover:text-slate-900'
-                            : 'border-emerald-500 bg-emerald-600 text-white hover:bg-emerald-500'
+                            ? 'border-[#EAE2D6] dark:border-[#353E2F] text-slate-500 hover:text-slate-900 dark:hover:text-slate-100'
+                            : 'border-[#8B9A6E] bg-[#8B9A6E] text-white hover:bg-[#79875F]'
                         }`}
                       >
                         {exp.isSettled ? 'Undo' : 'Settle'}
@@ -188,10 +188,10 @@ export const ExpenseSummaryModal: React.FC<ExpenseSummaryModalProps> = ({ isOpen
         </div>
 
         {/* Footer */}
-        <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex justify-end">
+        <div className="pt-3 border-t border-[#EAE2D6] dark:border-[#353E2F] flex justify-end">
           <button
             onClick={onClose}
-            className="px-4 py-2 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-xs font-semibold"
+            className="px-4 py-2 rounded-xl bg-[#8B9A6E] hover:bg-[#79875F] text-white text-xs font-semibold shadow-xs transition-colors"
           >
             Close
           </button>

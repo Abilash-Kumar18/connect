@@ -41,7 +41,7 @@ function MainWorkspaceLayout() {
   const [isAuthOpen, setIsAuthOpen] = useState(false);
 
   return (
-    <div className="flex h-screen w-screen overflow-hidden bg-slate-50 dark:bg-slate-950 font-sans antialiased">
+    <div className="flex h-screen w-screen overflow-hidden bg-[#F7F2EB] dark:bg-[#1E231B] text-[#2D3325] dark:text-[#F7F2EB] font-sans antialiased">
       {/* Authentication Modal (if logged out) */}
       {!isAuthenticated && <AuthModal isOpen={true} />}
 

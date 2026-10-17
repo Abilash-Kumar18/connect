@@ -88,7 +88,7 @@ export const ChatPane: React.FC<ChatPaneProps> = ({
   if (!activeChannel) {
     return (
       <div className="flex-1 flex flex-col items-center justify-center p-6 text-center bg-slate-50 dark:bg-slate-950">
-        <div className="w-16 h-16 rounded-2xl bg-indigo-50 dark:bg-indigo-950 flex items-center justify-center text-indigo-600 mb-4">
+        <div className="w-16 h-16 rounded-2xl bg-[#EAE2D6]/60 dark:bg-[#252C21] flex items-center justify-center text-[#8B9A6E] mb-4">
           <ChannelIcon name="MessageCircle" className="w-8 h-8" />
         </div>
         <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100">
@@ -99,7 +99,7 @@ export const ChatPane: React.FC<ChatPaneProps> = ({
         </p>
         <button
           onClick={onOpenNewChannelModal}
-          className="mt-4 px-4 py-2 rounded-xl bg-indigo-600 text-white text-xs font-semibold"
+          className="mt-4 px-4 py-2 rounded-xl bg-[#8B9A6E] hover:bg-[#79875F] text-white text-xs font-semibold shadow-sm transition-colors"
         >
           Create Channel
         </button>
@@ -171,37 +171,37 @@ export const ChatPane: React.FC<ChatPaneProps> = ({
   };
 
   return (
-    <div className="flex-1 flex flex-col h-full bg-slate-100/60 dark:bg-slate-950 overflow-hidden relative">
+    <div className="flex-1 flex flex-col h-full bg-[#F7F2EB] dark:bg-[#1E231B] overflow-hidden relative">
       {/* 1. Header Bar */}
-      <header className="h-16 px-4 border-b border-slate-200/90 dark:border-slate-800 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md flex items-center justify-between gap-3 shrink-0 z-20">
+      <header className="h-16 px-4 border-b border-[#EAE2D6] dark:border-[#353E2F] bg-[#F7F2EB]/95 dark:bg-[#1E231B]/95 backdrop-blur-md flex items-center justify-between gap-3 shrink-0 z-20">
         <div className="flex items-center gap-2.5 min-w-0">
           {/* Mobile Back / Drawer Button */}
           <button
             onClick={() => setIsMobileDrawerOpen(true)}
-            className="md:hidden p-2 -ml-1 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
+            className="md:hidden p-2 -ml-1 rounded-xl text-[#586348] dark:text-[#C5CEB8] hover:bg-[#EAE2D6] dark:hover:bg-[#252C21]"
             title="Open Channels List"
           >
             <Menu className="w-5 h-5" />
           </button>
 
           {/* Channel Icon */}
-          <div className="w-9 h-9 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0 border border-indigo-100 dark:border-indigo-900/50">
+          <div className="w-9 h-9 rounded-xl bg-[#8B9A6E]/15 text-[#586348] dark:text-[#C5CEB8] flex items-center justify-center shrink-0 border border-[#8B9A6E]/30">
             <ChannelIcon name={activeChannel.icon} className="w-4 h-4" />
           </div>
 
           {/* Topic Title & Context Info */}
           <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <h2 className="text-sm font-bold font-display text-slate-900 dark:text-white truncate">
+              <h2 className="text-sm font-bold font-display text-[#2D3325] dark:text-white truncate">
                 {activeChannel.name}
               </h2>
               {activeChannel.isPinned && (
-                <span title="Pinned Channel" className="text-amber-500">
-                  <Pin className="w-3.5 h-3.5 fill-amber-500" />
+                <span title="Pinned Channel" className="text-[#8B9A6E]">
+                  <Pin className="w-3.5 h-3.5 fill-[#8B9A6E]" />
                 </span>
               )}
             </div>
-            <div className="text-[11px] text-slate-500 truncate flex items-center gap-2">
+            <div className="text-[11px] text-[#788566] dark:text-[#A7B395] truncate flex items-center gap-2">
               <span>{currentUser.name.split(' ')[0]} & {partnerUser.name.split(' ')[0]}</span>
               <span aria-hidden="true">·</span>
               <span className="truncate">{activeChannel.description}</span>
@@ -217,8 +217,8 @@ export const ChatPane: React.FC<ChatPaneProps> = ({
             title="Search inside this channel"
             className={`p-2 rounded-xl transition-colors ${
               showTopicSearch || topicSearch
-                ? 'bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400'
-                : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800'
+                ? 'bg-[#8B9A6E]/20 text-[#586348] dark:text-[#C5CEB8]'
+                : 'text-[#788566] hover:text-[#2D3325] dark:hover:text-white hover:bg-[#EAE2D6] dark:hover:bg-[#252C21]'
             }`}
           >
             <Search className="w-4 h-4" />
@@ -229,9 +229,9 @@ export const ChatPane: React.FC<ChatPaneProps> = ({
             <button
               onClick={onOpenSummaryModal}
               title="View itemized expense breakdown"
-              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-emerald-200 dark:border-emerald-900/50 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 text-xs font-semibold hover:bg-emerald-100/70 transition-colors"
+              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-[#8B9A6E]/40 bg-[#EAE2D6]/80 dark:bg-[#252C21] text-[#4A5538] dark:text-[#EAE2D6] text-xs font-semibold hover:bg-[#EAE2D6] transition-colors"
             >
-              <Receipt className="w-3.5 h-3.5" />
+              <Receipt className="w-3.5 h-3.5 text-[#8B9A6E]" />
               <span>
                 {Math.abs(channelSummary.netBalance) > 0.01
                   ? `${channelSummary.netBalance > 0 ? 'Jordan owes' : 'You owe'} ${activeChannel.currency || '$'}${Math.abs(channelSummary.netBalance).toFixed(2)}`
@@ -246,20 +246,20 @@ export const ChatPane: React.FC<ChatPaneProps> = ({
             title={activeChannel.isPinned ? 'Unpin channel' : 'Pin channel to top'}
             className={`p-2 rounded-xl transition-colors ${
               activeChannel.isPinned
-                ? 'text-amber-500 bg-amber-50 dark:bg-amber-950/40'
-                : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800'
+                ? 'text-[#8B9A6E] bg-[#EAE2D6] dark:bg-[#252C21]'
+                : 'text-[#788566] hover:text-[#2D3325] dark:hover:text-white hover:bg-[#EAE2D6] dark:hover:bg-[#252C21]'
             }`}
           >
-            <Pin className={`w-4 h-4 ${activeChannel.isPinned ? 'fill-amber-500' : ''}`} />
+            <Pin className={`w-4 h-4 ${activeChannel.isPinned ? 'fill-[#8B9A6E]' : ''}`} />
           </button>
 
           {/* Switch Sender indicator pill */}
           <button
             onClick={() => setCurrentUserId(currentUser.id === 'alex' ? 'jordan' : 'alex')}
             title={`Currently chatting as ${currentUser.name}. Click to switch to ${partnerUser.name}.`}
-            className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-medium hover:border-indigo-400 transition-colors"
+            className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl border border-[#DFD6C7] dark:border-[#353E2F] bg-white dark:bg-[#252C21] text-[#4A5538] dark:text-[#EAE2D6] text-xs font-medium hover:border-[#8B9A6E] transition-colors"
           >
-            <ArrowRightLeft className="w-3 h-3 text-indigo-500" />
+            <ArrowRightLeft className="w-3 h-3 text-[#8B9A6E]" />
             <span className="hidden lg:inline text-[11px]">As:</span>
             <span className="font-semibold text-[11px]">{currentUser.name.split(' ')[0]}</span>
           </button>
@@ -267,35 +267,35 @@ export const ChatPane: React.FC<ChatPaneProps> = ({
       </header>
 
       {/* 2. Sub-Header: Search bar or In-Topic Filter Pills */}
-      <div className="px-4 py-2 border-b border-slate-200/60 dark:border-slate-800/80 bg-white/50 dark:bg-slate-900/40 backdrop-blur-xs flex items-center justify-between gap-2 overflow-x-auto text-[11px]">
+      <div className="px-4 py-2 border-b border-[#EAE2D6] dark:border-[#353E2F] bg-[#F7F2EB]/80 dark:bg-[#1E231B]/80 backdrop-blur-xs flex items-center justify-between gap-2 overflow-x-auto text-[11px]">
         {showTopicSearch ? (
           <div className="relative w-full flex items-center gap-2">
-            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5" />
+            <Search className="w-3.5 h-3.5 text-[#788566] absolute left-2.5" />
             <input
               type="text"
               value={topicSearch}
               onChange={(e) => setTopicSearch(e.target.value)}
               placeholder={`Filter messages in #${activeChannel.name}...`}
-              className="w-full pl-8 pr-7 py-1 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
+              className="w-full pl-8 pr-7 py-1 rounded-lg border border-[#EAE2D6] dark:border-[#353E2F] bg-[#EEEEEE] dark:bg-[#252C21] text-xs text-[#2D3325] dark:text-[#F7F2EB] focus:outline-none focus:ring-1 focus:ring-[#8B9A6E]"
               autoFocus
             />
             {topicSearch && (
               <button
                 onClick={() => setTopicSearch('')}
-                className="absolute right-2 text-slate-400 hover:text-slate-600 text-xs"
+                className="absolute right-2 text-[#788566] hover:text-[#2D3325] text-xs"
               >
                 ×
               </button>
             )}
           </div>
         ) : (
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1.5">
             <button
               onClick={() => setTopicFilter('all')}
               className={`px-2.5 py-1 rounded-lg font-medium transition-colors ${
                 topicFilter === 'all'
-                  ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                  ? 'bg-[#8B9A6E] text-white shadow-xs'
+                  : 'bg-[#EEEEEE] dark:bg-[#252C21] text-[#586348] dark:text-[#C5CEB8] hover:bg-[#EAE2D6]'
               }`}
             >
               All Messages ({activeMessages.length})
@@ -304,8 +304,8 @@ export const ChatPane: React.FC<ChatPaneProps> = ({
               onClick={() => setTopicFilter('important')}
               className={`px-2.5 py-1 rounded-lg font-medium transition-colors flex items-center gap-1 ${
                 topicFilter === 'important'
-                  ? 'bg-amber-500 text-white'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                  ? 'bg-[#8B9A6E] text-white shadow-xs'
+                  : 'bg-[#EEEEEE] dark:bg-[#252C21] text-[#586348] dark:text-[#C5CEB8] hover:bg-[#EAE2D6]'
               }`}
             >
               <Star className="w-3 h-3" />
@@ -316,8 +316,8 @@ export const ChatPane: React.FC<ChatPaneProps> = ({
                 onClick={() => setTopicFilter('expense')}
                 className={`px-2.5 py-1 rounded-lg font-medium transition-colors flex items-center gap-1 ${
                   topicFilter === 'expense'
-                    ? 'bg-emerald-600 text-white'
-                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                    ? 'bg-[#8B9A6E] text-white shadow-xs'
+                    : 'bg-[#EEEEEE] dark:bg-[#252C21] text-[#586348] dark:text-[#C5CEB8] hover:bg-[#EAE2D6]'
                 }`}
               >
                 <Receipt className="w-3 h-3" />
@@ -328,8 +328,8 @@ export const ChatPane: React.FC<ChatPaneProps> = ({
               onClick={() => setTopicFilter('meeting')}
               className={`px-2.5 py-1 rounded-lg font-medium transition-colors flex items-center gap-1 ${
                 topicFilter === 'meeting'
-                  ? 'bg-purple-600 text-white'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                  ? 'bg-[#8B9A6E] text-white shadow-xs'
+                  : 'bg-[#EEEEEE] dark:bg-[#252C21] text-[#586348] dark:text-[#C5CEB8] hover:bg-[#EAE2D6]'
               }`}
             >
               <Calendar className="w-3 h-3" />
@@ -340,8 +340,8 @@ export const ChatPane: React.FC<ChatPaneProps> = ({
                 onClick={() => setTopicFilter('pinned')}
                 className={`px-2.5 py-1 rounded-lg font-medium transition-colors flex items-center gap-1 ${
                   topicFilter === 'pinned'
-                    ? 'bg-indigo-600 text-white'
-                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                    ? 'bg-[#8B9A6E] text-white shadow-xs'
+                    : 'bg-[#EEEEEE] dark:bg-[#252C21] text-[#586348] dark:text-[#C5CEB8] hover:bg-[#EAE2D6]'
                 }`}
               >
                 <Pin className="w-3 h-3" />
@@ -355,7 +355,7 @@ export const ChatPane: React.FC<ChatPaneProps> = ({
         {hasExpenses && (
           <button
             onClick={onOpenSummaryModal}
-            className="sm:hidden text-emerald-600 dark:text-emerald-400 font-semibold whitespace-nowrap text-[11px] underline"
+            className="sm:hidden text-[#8B9A6E] dark:text-[#A3B386] font-semibold whitespace-nowrap text-[11px] underline"
           >
             Balance
           </button>
@@ -366,7 +366,7 @@ export const ChatPane: React.FC<ChatPaneProps> = ({
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {filteredMessages.length === 0 ? (
           <div className="text-center py-16 px-4">
-            <div className="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-950/50 flex items-center justify-center text-indigo-500 mx-auto mb-3">
+            <div className="w-12 h-12 rounded-2xl bg-[#EAE2D6]/60 dark:bg-[#252C21] flex items-center justify-center text-[#8B9A6E] mx-auto mb-3">
               <ChannelIcon name={activeChannel.icon} className="w-6 h-6" />
             </div>
             <h4 className="text-sm font-bold text-slate-800 dark:text-slate-200">
@@ -402,8 +402,8 @@ export const ChatPane: React.FC<ChatPaneProps> = ({
                     </span>
                   )}
                   {msg.isPinnedInChat && (
-                    <span className="text-indigo-500 flex items-center gap-0.5 font-semibold">
-                      <Pin className="w-3 h-3 fill-indigo-500" />
+                    <span className="text-[#8B9A6E] flex items-center gap-0.5 font-semibold">
+                      <Pin className="w-3 h-3 fill-[#8B9A6E]" />
                       <span>Pinned</span>
                     </span>
                   )}
@@ -416,25 +416,25 @@ export const ChatPane: React.FC<ChatPaneProps> = ({
                     <div
                       className={`p-4 rounded-3xl border shadow-sm transition-all ${
                         msg.expense.isSettled
-                          ? 'bg-slate-100/90 dark:bg-slate-900/90 border-slate-300 dark:border-slate-800 opacity-80'
+                          ? 'bg-slate-100/90 dark:bg-slate-900/90 border-[#EAE2D6] dark:border-[#353E2F] opacity-80'
                           : isMe
-                          ? 'bg-gradient-to-br from-indigo-900 to-slate-900 text-white border-indigo-700/50 shadow-indigo-950/30'
-                          : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white'
+                          ? 'bg-gradient-to-br from-[#4F593E] to-[#2E3525] text-[#F7F2EB] border-[#8B9A6E]/50 shadow-sm'
+                          : 'bg-[#F7F2EB] dark:bg-[#1E231B] border-[#EAE2D6] dark:border-[#353E2F] text-slate-900 dark:text-white'
                       }`}
                     >
-                      <div className="flex items-center justify-between gap-2 pb-2 border-b border-white/10 dark:border-slate-800">
+                      <div className="flex items-center justify-between gap-2 pb-2 border-b border-[#EAE2D6]/40 dark:border-white/10">
                         <div className="flex items-center gap-1.5">
-                          <Receipt className="w-4 h-4 text-emerald-400" />
+                          <Receipt className="w-4 h-4 text-[#8B9A6E] dark:text-[#A3B386]" />
                           <span className="text-xs font-semibold uppercase tracking-wider opacity-80">
                             {msg.expense.category}
                           </span>
                         </div>
                         {msg.expense.isSettled ? (
-                          <span className="px-2 py-0.5 rounded-full bg-slate-300/40 text-[10px] font-semibold text-slate-500 dark:text-slate-400">
+                          <span className="px-2 py-0.5 rounded-full bg-[#EEEEEE] dark:bg-[#2A3125] text-[10px] font-semibold text-slate-500 dark:text-slate-400">
                             Settled
                           </span>
                         ) : (
-                          <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-[10px] font-semibold">
+                          <span className="px-2 py-0.5 rounded-full bg-[#8B9A6E]/20 text-[#8B9A6E] dark:text-[#A3B386] text-[10px] font-semibold">
                             Pending
                           </span>
                         )}
@@ -442,7 +442,7 @@ export const ChatPane: React.FC<ChatPaneProps> = ({
 
                       <div className="my-2.5">
                         <div className="text-sm font-semibold">{msg.expense.title}</div>
-                        <div className="text-2xl font-bold font-mono tabular-nums mt-1 text-emerald-400">
+                        <div className="text-2xl font-bold font-mono tabular-nums mt-1 text-[#8B9A6E] dark:text-[#A3B386]">
                           {msg.expense.currency}
                           {msg.expense.amount.toFixed(2)}
                         </div>
@@ -454,7 +454,7 @@ export const ChatPane: React.FC<ChatPaneProps> = ({
                         </div>
                       </div>
 
-                      <div className="pt-2 border-t border-white/10 dark:border-slate-800 flex items-center justify-between">
+                      <div className="pt-2 border-t border-[#EAE2D6]/40 dark:border-white/10 flex items-center justify-between">
                         <span className="text-[10px] opacity-60">
                           {formatTimestamp(msg.timestamp)}
                         </span>
@@ -463,8 +463,8 @@ export const ChatPane: React.FC<ChatPaneProps> = ({
                           onClick={() => markExpenseSettled(msg.id)}
                           className={`px-3 py-1 rounded-xl text-xs font-medium transition-all ${
                             msg.expense.isSettled
-                              ? 'bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-300'
-                              : 'bg-emerald-500 hover:bg-emerald-400 text-white font-semibold shadow-xs'
+                              ? 'bg-[#EEEEEE] dark:bg-[#252C21] text-slate-700 dark:text-slate-300 hover:bg-[#EAE2D6]'
+                              : 'bg-[#8B9A6E] hover:bg-[#79875F] text-white font-semibold shadow-xs'
                           }`}
                         >
                           {msg.expense.isSettled ? 'Mark Unsettled' : 'Mark Settled'}
@@ -476,12 +476,12 @@ export const ChatPane: React.FC<ChatPaneProps> = ({
                     <div
                       className={`p-4 rounded-3xl border shadow-sm ${
                         isMe
-                          ? 'bg-indigo-600 text-white border-indigo-500'
-                          : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white'
+                          ? 'bg-[#8B9A6E] text-white border-[#79875F]'
+                          : 'bg-[#F7F2EB] dark:bg-[#1E231B] border-[#EAE2D6] dark:border-[#353E2F] text-slate-900 dark:text-white'
                       }`}
                     >
                       <div className="flex items-center gap-1.5 text-xs font-semibold mb-2 opacity-90">
-                        <Calendar className="w-4 h-4 text-purple-300" />
+                        <Calendar className="w-4 h-4 text-[#EAE2D6]" />
                         <span>Meeting & Event Note</span>
                       </div>
                       <div className="text-sm font-bold">{msg.meeting.title}</div>
@@ -514,22 +514,22 @@ export const ChatPane: React.FC<ChatPaneProps> = ({
                     <div
                       className={`px-4 py-2.5 rounded-2xl text-xs sm:text-sm leading-relaxed shadow-xs ${
                         isMe
-                          ? 'bg-indigo-600 text-white rounded-br-xs'
-                          : 'bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 border border-slate-200/80 dark:border-slate-800 rounded-bl-xs'
+                          ? 'bg-[#8B9A6E] text-white rounded-br-xs'
+                          : 'bg-[#F7F2EB] dark:bg-[#252C21] text-[#2D3325] dark:text-[#F7F2EB] border border-[#EAE2D6] dark:border-[#353E2F] rounded-bl-xs'
                       }`}
                     >
                       <p className="whitespace-pre-wrap break-words">{msg.content}</p>
 
                       <div
                         className={`flex items-center justify-end gap-1 text-[10px] mt-1 ${
-                          isMe ? 'text-indigo-200' : 'text-slate-400'
+                          isMe ? 'text-[#EAF0DE]' : 'text-[#8F9882]'
                         }`}
                       >
                         <span>{formatTimestamp(msg.timestamp)}</span>
                         {isMe && (
                           <span>
                             {msg.status === 'read' ? (
-                              <CheckCheck className="w-3.5 h-3.5 text-sky-300" />
+                              <CheckCheck className="w-3.5 h-3.5 text-[#EAF0DE]" />
                             ) : (
                               <Check className="w-3.5 h-3.5" />
                             )}
@@ -551,8 +551,8 @@ export const ChatPane: React.FC<ChatPaneProps> = ({
                             onClick={() => addReaction(msg.id, emoji)}
                             className={`px-2 py-0.5 rounded-full text-[11px] border flex items-center gap-1 transition-all ${
                               hasReacted
-                                ? 'border-indigo-400 bg-indigo-50 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300'
-                                : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300'
+                                ? 'border-[#8B9A6E] bg-[#8B9A6E]/15 text-[#5B6B44] dark:text-[#B5C49A]'
+                                : 'border-[#EAE2D6] dark:border-[#353E2F] bg-white dark:bg-[#1E231B] text-slate-600 dark:text-slate-300'
                             }`}
                           >
                             <span>{emoji}</span>
@@ -603,12 +603,12 @@ export const ChatPane: React.FC<ChatPaneProps> = ({
                     <button
                       type="button"
                       onClick={() => togglePinMessageInChat(msg.id)}
-                      className={`p-1 rounded text-slate-400 hover:text-indigo-500 hover:bg-slate-100 dark:hover:bg-slate-700 ${
-                        msg.isPinnedInChat ? 'text-indigo-500' : ''
+                      className={`p-1 rounded text-slate-400 hover:text-[#8B9A6E] hover:bg-[#EEEEEE] dark:hover:bg-[#252C21] ${
+                        msg.isPinnedInChat ? 'text-[#8B9A6E]' : ''
                       }`}
                       title={msg.isPinnedInChat ? 'Unpin from chat' : 'Pin in chat'}
                     >
-                      <Pin className={`w-3.5 h-3.5 ${msg.isPinnedInChat ? 'fill-indigo-500' : ''}`} />
+                      <Pin className={`w-3.5 h-3.5 ${msg.isPinnedInChat ? 'fill-[#8B9A6E]' : ''}`} />
                     </button>
 
                     {/* Delete Message */}
@@ -630,24 +630,24 @@ export const ChatPane: React.FC<ChatPaneProps> = ({
       </div>
 
       {/* 4. Message Input & Quick Action Bar */}
-      <div className="p-3 bg-white/95 dark:bg-slate-900/95 border-t border-slate-200/90 dark:border-slate-800 backdrop-blur-md shrink-0">
+      <div className="p-3 bg-[#F7F2EB]/95 dark:bg-[#1E231B]/95 border-t border-[#EAE2D6] dark:border-[#353E2F] backdrop-blur-md shrink-0">
         {/* Quick Action Chips Row */}
         <div className="flex items-center gap-1.5 pb-2 overflow-x-auto scrollbar-none text-xs">
           <button
             type="button"
             onClick={onOpenExpenseModal}
-            className="px-3 py-1.5 rounded-xl border border-emerald-200 dark:border-emerald-800/60 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 font-semibold flex items-center gap-1.5 hover:bg-emerald-100 transition-colors shrink-0"
+            className="px-3 py-1.5 rounded-xl border border-[#DFD6C7] dark:border-[#353E2F] bg-[#EEEEEE] dark:bg-[#252C21] text-[#586348] dark:text-[#C5CEB8] font-semibold flex items-center gap-1.5 hover:bg-[#EAE2D6] transition-colors shrink-0"
           >
-            <Receipt className="w-3.5 h-3.5" />
+            <Receipt className="w-3.5 h-3.5 text-[#8B9A6E]" />
             <span>Add Expense</span>
           </button>
 
           <button
             type="button"
             onClick={onOpenMeetingModal}
-            className="px-3 py-1.5 rounded-xl border border-purple-200 dark:border-purple-800/60 bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300 font-semibold flex items-center gap-1.5 hover:bg-purple-100 transition-colors shrink-0"
+            className="px-3 py-1.5 rounded-xl border border-[#DFD6C7] dark:border-[#353E2F] bg-[#EEEEEE] dark:bg-[#252C21] text-[#586348] dark:text-[#C5CEB8] font-semibold flex items-center gap-1.5 hover:bg-[#EAE2D6] transition-colors shrink-0"
           >
-            <Calendar className="w-3.5 h-3.5" />
+            <Calendar className="w-3.5 h-3.5 text-[#8B9A6E]" />
             <span>Note Meeting</span>
           </button>
 
@@ -656,11 +656,11 @@ export const ChatPane: React.FC<ChatPaneProps> = ({
             onClick={() => setIsDraftImportant(!isDraftImportant)}
             className={`px-3 py-1.5 rounded-xl border font-semibold flex items-center gap-1.5 transition-colors shrink-0 ${
               isDraftImportant
-                ? 'border-amber-400 bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300'
-                : 'border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/60 text-slate-600 dark:text-slate-400 hover:text-slate-900'
+                ? 'border-[#8B9A6E] bg-[#8B9A6E]/15 text-[#586348] dark:text-[#EAF0DE]'
+                : 'border-[#DFD6C7] dark:border-[#353E2F] bg-[#EEEEEE] dark:bg-[#252C21] text-[#586348] dark:text-[#C5CEB8] hover:bg-[#EAE2D6]'
             }`}
           >
-            <Star className={`w-3.5 h-3.5 ${isDraftImportant ? 'fill-amber-500' : ''}`} />
+            <Star className={`w-3.5 h-3.5 ${isDraftImportant ? 'fill-[#8B9A6E] text-[#8B9A6E]' : ''}`} />
             <span>{isDraftImportant ? 'Important Flagged' : 'Mark Important'}</span>
           </button>
 
@@ -669,9 +669,9 @@ export const ChatPane: React.FC<ChatPaneProps> = ({
             type="button"
             onClick={() => simulatePartnerReply()}
             title={`Simulate an instant realistic reply from ${partnerUser.name}`}
-            className="px-3 py-1.5 rounded-xl border border-indigo-200 dark:border-indigo-800/60 bg-indigo-50/60 dark:bg-indigo-950/30 text-indigo-700 dark:text-indigo-300 font-medium flex items-center gap-1.5 hover:bg-indigo-100 transition-colors shrink-0"
+            className="px-3 py-1.5 rounded-xl border border-[#DFD6C7] dark:border-[#353E2F] bg-[#EEEEEE] dark:bg-[#252C21] text-[#586348] dark:text-[#C5CEB8] font-medium flex items-center gap-1.5 hover:bg-[#EAE2D6] transition-colors shrink-0"
           >
-            <Sparkles className="w-3.5 h-3.5 text-indigo-500" />
+            <Sparkles className="w-3.5 h-3.5 text-[#8B9A6E]" />
             <span>{partnerUser.name.split(' ')[0]} Replies...</span>
           </button>
         </div>
@@ -683,14 +683,14 @@ export const ChatPane: React.FC<ChatPaneProps> = ({
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 10 }}
-              className="mb-2 p-2 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xl flex flex-wrap gap-1.5"
+              className="mb-2 p-2 rounded-2xl bg-[#F7F2EB] dark:bg-[#252C21] border border-[#EAE2D6] dark:border-[#353E2F] shadow-xl flex flex-wrap gap-1.5"
             >
               {COMMON_EMOJIS.map((emoji) => (
                 <button
                   key={emoji}
                   type="button"
                   onClick={() => addEmojiToInput(emoji)}
-                  className="w-8 h-8 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 text-lg flex items-center justify-center transition-transform hover:scale-110"
+                  className="w-8 h-8 rounded-lg hover:bg-[#EAE2D6] dark:hover:bg-[#353E2F] text-lg flex items-center justify-center transition-transform hover:scale-110"
                 >
                   {emoji}
                 </button>
@@ -707,8 +707,8 @@ export const ChatPane: React.FC<ChatPaneProps> = ({
             onClick={() => setShowEmojiPicker(!showEmojiPicker)}
             className={`p-2.5 rounded-xl transition-colors ${
               showEmojiPicker
-                ? 'text-indigo-600 bg-indigo-50 dark:bg-indigo-950'
-                : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800'
+                ? 'text-[#8B9A6E] bg-[#EAE2D6] dark:bg-[#252C21]'
+                : 'text-[#788566] hover:text-[#2D3325] dark:hover:text-white hover:bg-[#EAE2D6] dark:hover:bg-[#252C21]'
             }`}
           >
             <Smile className="w-5 h-5" />
@@ -723,7 +723,7 @@ export const ChatPane: React.FC<ChatPaneProps> = ({
               onChange={handleTextareaInput}
               onKeyDown={handleKeyDown}
               placeholder={`Message #${activeChannel.name} as ${currentUser.name.split(' ')[0]}...`}
-              className="w-full px-4 py-2.5 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 text-xs sm:text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none max-h-32 transition-all leading-relaxed"
+              className="w-full px-4 py-2.5 rounded-2xl border border-[#DFD6C7] dark:border-[#353E2F] bg-[#EEEEEE] dark:bg-[#252C21] text-xs sm:text-sm text-[#2D3325] dark:text-[#F7F2EB] placeholder-[#8F9882] focus:outline-none focus:ring-2 focus:ring-[#8B9A6E]/40 resize-none max-h-32 transition-all leading-relaxed"
             />
           </div>
 
@@ -734,8 +734,8 @@ export const ChatPane: React.FC<ChatPaneProps> = ({
             disabled={!inputText.trim()}
             className={`p-2.5 rounded-2xl flex items-center justify-center transition-all shadow-md ${
               inputText.trim()
-                ? 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-indigo-600/30'
-                : 'bg-slate-200 dark:bg-slate-800 text-slate-400 cursor-not-allowed shadow-none'
+                ? 'bg-[#8B9A6E] hover:bg-[#79875F] text-white shadow-[#8B9A6E]/30'
+                : 'bg-[#EEEEEE] dark:bg-[#252C21] text-[#A7B395] cursor-not-allowed shadow-none'
             }`}
           >
             <Send className="w-5 h-5" />
