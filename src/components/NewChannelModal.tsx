@@ -11,14 +11,6 @@ interface NewChannelModalProps {
   onClose: () => void;
 }
 
-const CATEGORIES: { id: ChannelCategory; label: string; desc: string; icon: string }[] = [
-  { id: 'general', label: 'General Chat', desc: 'Daily banter, shared links & quick notes', icon: 'MessageCircle' },
-  { id: 'expenses', label: 'Daily Expenses', desc: 'Track spending with automated split tallies', icon: 'Receipt' },
-  { id: 'college', label: 'College & Prints', desc: 'Lab sheets, xerox bills & materials', icon: 'Printer' },
-  { id: 'meetings', label: 'Meetings & Events', desc: 'Schedules, calendar invites & reviews', icon: 'Calendar' },
-  { id: 'projects', label: 'Project Work', desc: 'Sprints, tasks, repos & submissions', icon: 'Briefcase' },
-  { id: 'personal', label: 'Personal & Trip', desc: 'Travel planning, wishlist & shared ideas', icon: 'Heart' },
-];
 
 const SUGGESTIONS = [
   { name: 'Apartment Groceries', cat: 'expenses' as ChannelCategory, icon: 'Receipt' },
@@ -186,53 +178,6 @@ export const NewChannelModal: React.FC<NewChannelModalProps> = ({ isOpen, onClos
             </div>
           </div>
 
-          {/* Category selection */}
-          <div>
-            <div className="flex items-center justify-between mb-1.5">
-              <label className="text-xs font-semibold text-[#2D3325] dark:text-[#F7F2EB]">
-                Category
-              </label>
-              <span className="text-[11px] text-[#788566] dark:text-[#A7B395]">
-                Tailors features & tools
-              </span>
-            </div>
-            <div className="grid grid-cols-2 gap-2">
-              {CATEGORIES.map((cat) => {
-                const isSelected = category === cat.id;
-                return (
-                  <button
-                    type="button"
-                    key={cat.id}
-                    onClick={() => {
-                      setCategory(cat.id);
-                      if (cat.id === 'expenses') setSelectedIcon('Receipt');
-                      else if (cat.id === 'college') setSelectedIcon('Printer');
-                      else if (cat.id === 'meetings') setSelectedIcon('Calendar');
-                      else if (cat.id === 'projects') setSelectedIcon('Briefcase');
-                      else if (cat.id === 'personal') setSelectedIcon('Heart');
-                    }}
-                    className={`p-3 text-left rounded-2xl border transition-all text-xs relative ${
-                      isSelected
-                        ? 'border-[#8B9A6E] bg-[#8B9A6E]/15 dark:bg-[#8B9A6E]/20 text-[#2D3325] dark:text-white ring-2 ring-[#8B9A6E]/40 font-semibold shadow-xs'
-                        : 'border-[#DFD6C7] dark:border-[#384332] bg-white/70 dark:bg-[#252C21]/60 text-[#4A5538] dark:text-[#C5CEB8] hover:border-[#8B9A6E]/50 hover:bg-white dark:hover:bg-[#252C21]'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between mb-0.5">
-                      <span className="font-semibold text-xs text-[#2D3325] dark:text-[#F7F2EB]">
-                        {cat.label}
-                      </span>
-                      {isSelected && (
-                        <span className="w-2 h-2 rounded-full bg-[#8B9A6E]" />
-                      )}
-                    </div>
-                    <div className="text-[10px] text-[#788566] dark:text-[#A7B395] line-clamp-1">
-                      {cat.desc}
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
 
           {/* Icon Picker */}
           <div>
