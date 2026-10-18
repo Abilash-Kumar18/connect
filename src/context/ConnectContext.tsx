@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { User, Channel, Message, ExpenseSummary, ChannelCategory, ExpenseData, MessageType } from '../types';
 import { INITIAL_USERS, INITIAL_CHANNELS, INITIAL_MESSAGES } from '../data/seedData';
 
@@ -115,7 +115,36 @@ const STORAGE_KEYS = {
   AUTH: 'connect_auth_state_v2',
 };
 
+const deduplicateMessages = (msgList: Message[]): Message[] => {
+  const seenIds = new Set<string>();
+  const result: Message[] = [];
+  for (let i = 0; i < msgList.length; i++) {
+    const m = msgList[i];
+    if (!m || !m.id || seenIds.has(m.id)) continue;
+    seenIds.add(m.id);
+
+    // Filter out accidental duplicate messages with identical content within 2 seconds
+    const prev = result[result.length - 1];
+    if (
+      prev &&
+      prev.channelId === m.channelId &&
+      prev.senderId === m.senderId &&
+      prev.content === m.content &&
+      Math.abs(prev.timestamp - m.timestamp) < 2000
+    ) {
+      continue;
+    }
+
+    result.push(m);
+  }
+  return result;
+};
+
 export const ConnectProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  // Unique session/tab identifier to ignore self-broadcast messages
+  const tabId = useMemo(() => `tab_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`, []);
+  const channelRef = useRef<BroadcastChannel | null>(null);
+
   // Theme state
   const [darkMode, setDarkMode] = useState<boolean>(() => {
     const saved = localStorage.getItem(STORAGE_KEYS.DARK_MODE);
@@ -169,17 +198,20 @@ export const ConnectProvider: React.FC<{ children: React.ReactNode }> = ({ child
     return channels[0]?.id || 'chan_general';
   });
 
-  // Messages state
+  // Messages state with deduplication
   const [messages, setMessages] = useState<Message[]>(() => {
     const saved = localStorage.getItem(STORAGE_KEYS.MESSAGES);
     if (saved) {
       try {
-        return JSON.parse(saved);
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) {
+          return deduplicateMessages(parsed);
+        }
       } catch {
         // fallback
       }
     }
-    return INITIAL_MESSAGES;
+    return deduplicateMessages(INITIAL_MESSAGES);
   });
 
   // Navigation & Search state
@@ -230,40 +262,62 @@ export const ConnectProvider: React.FC<{ children: React.ReactNode }> = ({ child
   useEffect(() => {
     if (typeof BroadcastChannel === 'undefined') return;
     const channel = new BroadcastChannel('connect_duo_sync');
+    channelRef.current = channel;
 
     channel.onmessage = (event) => {
       const data = event.data;
-      if (!data) return;
-      if (data.type === 'NEW_MESSAGE') {
-        setMessages((prev) => [...prev, data.message]);
+      if (!data || data.senderTabId === tabId) return; // Prevent self-tab duplicate delivery
+
+      if (data.type === 'NEW_MESSAGE' && data.message) {
+        setMessages((prev) => {
+          if (prev.some((m) => m.id === data.message.id)) {
+            return prev;
+          }
+          return [...prev, data.message];
+        });
         if (soundEnabled && data.message.senderId !== currentUserId) {
           playSoundEffect('receive');
         }
-      } else if (data.type === 'UPDATE_MESSAGES') {
-        setMessages(data.messages);
-      } else if (data.type === 'UPDATE_CHANNELS') {
+      } else if (data.type === 'UPDATE_MESSAGES' && Array.isArray(data.messages)) {
+        setMessages(deduplicateMessages(data.messages));
+      } else if (data.type === 'UPDATE_CHANNELS' && Array.isArray(data.channels)) {
         setChannels(data.channels);
-      } else if (data.type === 'UPDATE_USERS') {
+      } else if (data.type === 'UPDATE_USERS' && data.users) {
         setUsers(data.users);
       }
     };
 
     return () => {
       channel.close();
-    };
-  }, [currentUserId, soundEnabled]);
-
-  const broadcastEvent = useCallback((eventData: any) => {
-    if (typeof BroadcastChannel !== 'undefined') {
-      try {
-        const bc = new BroadcastChannel('connect_duo_sync');
-        bc.postMessage(eventData);
-        bc.close();
-      } catch {
-        // ignore
+      if (channelRef.current === channel) {
+        channelRef.current = null;
       }
-    }
-  }, []);
+    };
+  }, [currentUserId, soundEnabled, tabId]);
+
+  const broadcastEvent = useCallback(
+    (eventData: any) => {
+      const payload = { ...eventData, senderTabId: tabId };
+      if (channelRef.current) {
+        try {
+          channelRef.current.postMessage(payload);
+          return;
+        } catch {
+          // ignore
+        }
+      }
+      if (typeof BroadcastChannel !== 'undefined') {
+        try {
+          const bc = new BroadcastChannel('connect_duo_sync');
+          bc.postMessage(payload);
+          bc.close();
+        } catch {
+          // ignore
+        }
+      }
+    },
+    [tabId]
+  );
 
   const currentUser = useMemo(() => users[currentUserId] || INITIAL_USERS.alex, [users, currentUserId]);
   const partnerUser = useMemo(() => {
@@ -420,7 +474,12 @@ export const ConnectProvider: React.FC<{ children: React.ReactNode }> = ({ child
     };
 
     // Update messages
-    setMessages((prev) => [...prev, newMsg]);
+    setMessages((prev) => {
+      if (prev.some((m) => m.id === newMsg.id)) {
+        return prev;
+      }
+      return [...prev, newMsg];
+    });
     broadcastEvent({ type: 'NEW_MESSAGE', message: newMsg });
 
     // Update channel snippet and timestamp

@@ -75,6 +75,7 @@ export const ChatPane: React.FC<ChatPaneProps> = ({
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const isSendingRef = useRef(false);
 
   // Auto scroll to bottom
   const scrollToBottom = () => {
@@ -130,10 +131,13 @@ export const ChatPane: React.FC<ChatPaneProps> = ({
 
   const handleSend = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    if (!inputText.trim()) return;
+    const text = inputText.trim();
+    if (!text || isSendingRef.current) return;
+
+    isSendingRef.current = true;
 
     sendMessage({
-      content: inputText.trim(),
+      content: text,
       type: 'text',
       isImportant: isDraftImportant,
     });
@@ -144,10 +148,15 @@ export const ChatPane: React.FC<ChatPaneProps> = ({
     if (textareaRef.current) {
       textareaRef.current.style.height = 'auto';
     }
+
+    setTimeout(() => {
+      isSendingRef.current = false;
+    }, 250);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
+      if (e.nativeEvent.isComposing) return;
       e.preventDefault();
       handleSend();
     }
