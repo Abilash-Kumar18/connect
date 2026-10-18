@@ -724,21 +724,6 @@ export const ChatPane: React.FC<ChatPaneProps> = ({
             <Sparkles className="w-3.5 h-3.5 text-[#8B9A6E]" />
             <span>{partnerUser.name.split(' ')[0]} Replies...</span>
           </button>
-
-          {/* Quick Wallpaper / Background Button */}
-          <button
-            type="button"
-            onClick={() => setIsWallpaperModalOpen(true)}
-            title="Attach a custom photo or wallpaper"
-            className={`px-3 py-1.5 rounded-xl border text-xs font-medium flex items-center gap-1.5 transition-colors shrink-0 ${
-              activeBg
-                ? 'border-zinc-900 dark:border-white bg-zinc-950 text-white dark:bg-white dark:text-zinc-950 font-semibold'
-                : 'border-[#DFD6C7] dark:border-[#353E2F] bg-[#EEEEEE] dark:bg-[#252C21] text-[#586348] dark:text-[#C5CEB8] hover:bg-[#EAE2D6]'
-            }`}
-          >
-            <ImageIcon className="w-3.5 h-3.5" />
-            <span>{activeBg ? 'Edit Wallpaper' : 'Attach Background'}</span>
-          </button>
         </div>
 
         {/* Emoji Selector Popover */}
