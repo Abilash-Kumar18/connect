@@ -81,3 +81,10 @@ export interface ExpenseSummary {
   netBalance: number; // positive = user2 owes user1, negative = user1 owes user2
   unsettledCount: number;
 }
+
+export interface BackgroundSettings {
+  imageUrl: string;
+  opacity: number; // 0.1 to 1.0 (default 0.35)
+  blur: number; // 0 to 10 px
+}
+

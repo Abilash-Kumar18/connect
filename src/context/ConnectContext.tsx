@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useMemo, useCallback, useRef } from 'react';
-import { User, Channel, Message, ExpenseSummary, ChannelCategory, ExpenseData, MessageType } from '../types';
+import { User, Channel, Message, ExpenseSummary, ChannelCategory, ExpenseData, MessageType, BackgroundSettings } from '../types';
 import { INITIAL_USERS, INITIAL_CHANNELS, INITIAL_MESSAGES } from '../data/seedData';
 
 interface ConnectContextType {
@@ -51,6 +51,9 @@ interface ConnectContextType {
   isMobileDrawerOpen: boolean;
   setIsMobileDrawerOpen: (open: boolean) => void;
   resetToDefaults: () => void;
+  customBackgrounds: Record<string, BackgroundSettings>;
+  getChatBackground: (channelId?: string) => BackgroundSettings | null;
+  setChatBackground: (target: string, settings: BackgroundSettings | null) => void;
 }
 
 const ConnectContext = createContext<ConnectContextType | undefined>(undefined);
@@ -113,6 +116,7 @@ const STORAGE_KEYS = {
   DARK_MODE: 'connect_dark_mode_v2',
   SOUND: 'connect_sound_v2',
   AUTH: 'connect_auth_state_v2',
+  CHAT_BG: 'connect_chat_bg_v2',
 };
 
 const deduplicateMessages = (msgList: Message[]): Message[] => {
@@ -262,6 +266,23 @@ export const ConnectProvider: React.FC<{ children: React.ReactNode }> = ({ child
     localStorage.setItem(STORAGE_KEYS.AUTH, String(isAuthenticated));
   }, [isAuthenticated]);
 
+  // Chat Wallpaper background state
+  const [customBackgrounds, setCustomBackgrounds] = useState<Record<string, BackgroundSettings>>(() => {
+    const saved = localStorage.getItem(STORAGE_KEYS.CHAT_BG);
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch {
+        // fallback
+      }
+    }
+    return {};
+  });
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEYS.CHAT_BG, JSON.stringify(customBackgrounds));
+  }, [customBackgrounds]);
+
   // Real-time multi-tab synchronization via BroadcastChannel
   useEffect(() => {
     if (typeof BroadcastChannel === 'undefined') return;
@@ -288,6 +309,8 @@ export const ConnectProvider: React.FC<{ children: React.ReactNode }> = ({ child
         setChannels(data.channels);
       } else if (data.type === 'UPDATE_USERS' && data.users) {
         setUsers(data.users);
+      } else if (data.type === 'UPDATE_BACKGROUNDS' && data.backgrounds) {
+        setCustomBackgrounds(data.backgrounds);
       }
     };
 
@@ -710,6 +733,36 @@ export const ConnectProvider: React.FC<{ children: React.ReactNode }> = ({ child
     if (soundEnabled) playSoundEffect('settle');
   };
 
+  const setChatBackground = useCallback((target: string, settings: BackgroundSettings | null) => {
+    setCustomBackgrounds((prev) => {
+      const next = { ...prev };
+      if (settings) {
+        next[target] = settings;
+      } else {
+        delete next[target];
+      }
+      if (channelRef.current) {
+        try {
+          channelRef.current.postMessage({
+            type: 'UPDATE_BACKGROUNDS',
+            backgrounds: next,
+            senderTabId: tabId,
+          });
+        } catch {
+          // ignore
+        }
+      }
+      return next;
+    });
+  }, [tabId]);
+
+  const getChatBackground = useCallback((channelId?: string): BackgroundSettings | null => {
+    if (channelId && customBackgrounds[channelId]) {
+      return customBackgrounds[channelId];
+    }
+    return customBackgrounds['global'] || null;
+  }, [customBackgrounds]);
+
   const value = {
     currentUser,
     partnerUser,
@@ -746,6 +799,9 @@ export const ConnectProvider: React.FC<{ children: React.ReactNode }> = ({ child
     isMobileDrawerOpen,
     setIsMobileDrawerOpen,
     resetToDefaults,
+    customBackgrounds,
+    getChatBackground,
+    setChatBackground,
   };
 
   return <ConnectContext.Provider value={value}>{children}</ConnectContext.Provider>;

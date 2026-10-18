@@ -27,10 +27,12 @@ import {
   Heart,
   Laugh,
   Flame,
+  Image as ImageIcon,
 } from 'lucide-react';
 import { useConnect } from '../context/ConnectContext';
 import { ChannelIcon } from './ChannelIcon';
 import { Message, MessageType } from '../types';
+import { WallpaperModal } from './WallpaperModal';
 
 interface ChatPaneProps {
   onOpenExpenseModal: () => void;
@@ -63,6 +65,7 @@ export const ChatPane: React.FC<ChatPaneProps> = ({
     simulatePartnerReply,
     togglePinChannel,
     setIsMobileDrawerOpen,
+    getChatBackground,
   } = useConnect();
 
   const [inputText, setInputText] = useState('');
@@ -72,6 +75,9 @@ export const ChatPane: React.FC<ChatPaneProps> = ({
   const [topicSearch, setTopicSearch] = useState('');
   const [showTopicSearch, setShowTopicSearch] = useState(false);
   const [showPartnerSimulateMenu, setShowPartnerSimulateMenu] = useState(false);
+  const [isWallpaperModalOpen, setIsWallpaperModalOpen] = useState(false);
+
+  const activeBg = activeChannel ? getChatBackground(activeChannel.id) : null;
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -181,6 +187,21 @@ export const ChatPane: React.FC<ChatPaneProps> = ({
 
   return (
     <div className="flex-1 flex flex-col h-full bg-[#F7F2EB] dark:bg-[#1E231B] overflow-hidden relative">
+      {/* Custom Background Image Layer */}
+      {activeBg && (
+        <>
+          <div
+            className="absolute inset-0 pointer-events-none z-0 bg-cover bg-center transition-all duration-300"
+            style={{
+              backgroundImage: `url(${activeBg.imageUrl})`,
+              opacity: activeBg.opacity ?? 0.35,
+              filter: activeBg.blur ? `blur(${activeBg.blur}px)` : undefined,
+            }}
+          />
+          <div className="absolute inset-0 pointer-events-none z-0 bg-white/30 dark:bg-black/50 transition-colors" />
+        </>
+      )}
+
       {/* 1. Header Bar */}
       <header className="h-16 px-4 border-b border-[#EAE2D6] dark:border-[#353E2F] bg-[#F7F2EB]/95 dark:bg-[#1E231B]/95 backdrop-blur-md flex items-center justify-between gap-3 shrink-0 z-20">
         <div className="flex items-center gap-2.5 min-w-0">
@@ -260,6 +281,22 @@ export const ChatPane: React.FC<ChatPaneProps> = ({
             }`}
           >
             <Pin className={`w-4 h-4 ${activeChannel.isPinned ? 'fill-[#8B9A6E]' : ''}`} />
+          </button>
+
+          {/* Wallpaper / Background Photo Button */}
+          <button
+            onClick={() => setIsWallpaperModalOpen(true)}
+            title={activeBg ? 'Custom background active · Click to change or remove' : 'Attach background photo / wallpaper'}
+            className={`p-2 rounded-xl transition-all relative ${
+              activeBg
+                ? 'text-zinc-950 dark:text-white bg-black/10 dark:bg-white/10 ring-1 ring-black/20 dark:ring-white/20'
+                : 'text-[#788566] hover:text-[#2D3325] dark:hover:text-white hover:bg-[#EAE2D6] dark:hover:bg-[#252C21]'
+            }`}
+          >
+            <ImageIcon className="w-4 h-4" />
+            {activeBg && (
+              <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-emerald-500 ring-2 ring-white dark:ring-zinc-900" />
+            )}
           </button>
 
           {/* Switch Sender indicator pill */}
@@ -372,7 +409,7 @@ export const ChatPane: React.FC<ChatPaneProps> = ({
       </div>
 
       {/* 3. Messages Feed */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div className="flex-1 overflow-y-auto p-4 space-y-4 relative z-10">
         {filteredMessages.length === 0 ? (
           <div className="text-center py-16 px-4">
             <div className="w-12 h-12 rounded-2xl bg-[#EAE2D6]/60 dark:bg-[#252C21] flex items-center justify-center text-[#8B9A6E] mx-auto mb-3">
@@ -392,31 +429,29 @@ export const ChatPane: React.FC<ChatPaneProps> = ({
         ) : (
           filteredMessages.map((msg) => {
             const isMe = msg.senderId === currentUser.id;
-            const senderName = isMe ? currentUser.name : partnerUser.name;
 
             return (
               <div
                 key={msg.id}
                 className={`flex flex-col group ${isMe ? 'items-end' : 'items-start'}`}
               >
-                {/* Sender name & Important/Pin badges */}
-                <div className="flex items-center gap-1.5 text-[11px] text-slate-400 mb-1 px-1">
-                  <span className="font-medium text-slate-500 dark:text-slate-400">
-                    {senderName}
-                  </span>
-                  {msg.isImportant && (
-                    <span className="text-amber-500 flex items-center gap-0.5 font-semibold">
-                      <Star className="w-3 h-3 fill-amber-500" />
-                      <span>Important</span>
-                    </span>
-                  )}
-                  {msg.isPinnedInChat && (
-                    <span className="text-[#8B9A6E] flex items-center gap-0.5 font-semibold">
-                      <Pin className="w-3 h-3 fill-[#8B9A6E]" />
-                      <span>Pinned</span>
-                    </span>
-                  )}
-                </div>
+                {/* Important/Pin badges only (Sender name omitted per user request) */}
+                {(msg.isImportant || msg.isPinnedInChat) && (
+                  <div className="flex items-center gap-1.5 text-[11px] text-slate-400 mb-1 px-1">
+                    {msg.isImportant && (
+                      <span className="text-amber-500 flex items-center gap-0.5 font-semibold">
+                        <Star className="w-3 h-3 fill-amber-500" />
+                        <span>Important</span>
+                      </span>
+                    )}
+                    {msg.isPinnedInChat && (
+                      <span className="text-[#8B9A6E] flex items-center gap-0.5 font-semibold">
+                        <Pin className="w-3 h-3 fill-[#8B9A6E]" />
+                        <span>Pinned</span>
+                      </span>
+                    )}
+                  </div>
+                )}
 
                 {/* Message Bubble Container with Hover Actions */}
                 <div className="relative max-w-[85%] sm:max-w-md group/bubble">
@@ -689,6 +724,21 @@ export const ChatPane: React.FC<ChatPaneProps> = ({
             <Sparkles className="w-3.5 h-3.5 text-[#8B9A6E]" />
             <span>{partnerUser.name.split(' ')[0]} Replies...</span>
           </button>
+
+          {/* Quick Wallpaper / Background Button */}
+          <button
+            type="button"
+            onClick={() => setIsWallpaperModalOpen(true)}
+            title="Attach a custom photo or wallpaper"
+            className={`px-3 py-1.5 rounded-xl border text-xs font-medium flex items-center gap-1.5 transition-colors shrink-0 ${
+              activeBg
+                ? 'border-zinc-900 dark:border-white bg-zinc-950 text-white dark:bg-white dark:text-zinc-950 font-semibold'
+                : 'border-[#DFD6C7] dark:border-[#353E2F] bg-[#EEEEEE] dark:bg-[#252C21] text-[#586348] dark:text-[#C5CEB8] hover:bg-[#EAE2D6]'
+            }`}
+          >
+            <ImageIcon className="w-3.5 h-3.5" />
+            <span>{activeBg ? 'Edit Wallpaper' : 'Attach Background'}</span>
+          </button>
         </div>
 
         {/* Emoji Selector Popover */}
@@ -757,6 +807,14 @@ export const ChatPane: React.FC<ChatPaneProps> = ({
           </motion.button>
         </form>
       </div>
+
+      {/* Wallpaper & Background Photo Modal */}
+      <WallpaperModal
+        isOpen={isWallpaperModalOpen}
+        onClose={() => setIsWallpaperModalOpen(false)}
+        channelId={activeChannel.id}
+        channelName={activeChannel.name}
+      />
     </div>
   );
 };
