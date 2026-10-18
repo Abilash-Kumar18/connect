@@ -1,0 +1,6 @@
+{
+  "name": "CONNECT",
+  "description": "A purpose-driven duo communication app with context-separated topic channels, expense tracking, meeting notes, and smart organization.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
