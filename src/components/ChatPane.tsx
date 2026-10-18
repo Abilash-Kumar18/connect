@@ -425,25 +425,27 @@ export const ChatPane: React.FC<ChatPaneProps> = ({
                     <div
                       className={`p-4 rounded-3xl border shadow-sm transition-all ${
                         msg.expense.isSettled
-                          ? 'bg-slate-100/90 dark:bg-slate-900/90 border-[#EAE2D6] dark:border-[#353E2F] opacity-80'
+                          ? 'bg-zinc-100/90 dark:bg-zinc-900/90 border-zinc-200 dark:border-zinc-800 opacity-80'
                           : isMe
-                          ? 'bg-gradient-to-br from-[#4F593E] to-[#2E3525] text-[#F7F2EB] border-[#8B9A6E]/50 shadow-sm'
-                          : 'bg-[#F7F2EB] dark:bg-[#1E231B] border-[#EAE2D6] dark:border-[#353E2F] text-slate-900 dark:text-white'
+                          ? 'bg-zinc-950 text-white border-zinc-800 shadow-sm'
+                          : 'bg-zinc-50 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white'
                       }`}
                     >
-                      <div className="flex items-center justify-between gap-2 pb-2 border-b border-[#EAE2D6]/40 dark:border-white/10">
+                      <div className="flex items-center justify-between gap-2 pb-2 border-b border-zinc-200/40 dark:border-white/10">
                         <div className="flex items-center gap-1.5">
-                          <Receipt className="w-4 h-4 text-[#8B9A6E] dark:text-[#A3B386]" />
+                          <Receipt className={`w-4 h-4 ${isMe ? 'text-zinc-300' : 'text-zinc-700 dark:text-zinc-300'}`} />
                           <span className="text-xs font-semibold uppercase tracking-wider opacity-80">
                             {msg.expense.category}
                           </span>
                         </div>
                         {msg.expense.isSettled ? (
-                          <span className="px-2 py-0.5 rounded-full bg-[#EEEEEE] dark:bg-[#2A3125] text-[10px] font-semibold text-slate-500 dark:text-slate-400">
+                          <span className="px-2 py-0.5 rounded-full bg-zinc-200 dark:bg-zinc-800 text-[10px] font-semibold text-zinc-600 dark:text-zinc-400">
                             Settled
                           </span>
                         ) : (
-                          <span className="px-2 py-0.5 rounded-full bg-[#8B9A6E]/20 text-[#8B9A6E] dark:text-[#A3B386] text-[10px] font-semibold">
+                          <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${
+                            isMe ? 'bg-white/20 text-white' : 'bg-black/10 dark:bg-white/20 text-black dark:text-white'
+                          }`}>
                             Pending
                           </span>
                         )}
@@ -451,7 +453,9 @@ export const ChatPane: React.FC<ChatPaneProps> = ({
 
                       <div className="my-2.5">
                         <div className="text-sm font-semibold">{msg.expense.title}</div>
-                        <div className="text-2xl font-bold font-mono tabular-nums mt-1 text-[#8B9A6E] dark:text-[#A3B386]">
+                        <div className={`text-2xl font-bold font-mono tabular-nums mt-1 ${
+                          isMe ? 'text-white' : 'text-zinc-900 dark:text-white'
+                        }`}>
                           {msg.expense.currency}
                           {msg.expense.amount.toFixed(2)}
                         </div>
@@ -463,7 +467,7 @@ export const ChatPane: React.FC<ChatPaneProps> = ({
                         </div>
                       </div>
 
-                      <div className="pt-2 border-t border-[#EAE2D6]/40 dark:border-white/10 flex items-center justify-between">
+                      <div className="pt-2 border-t border-zinc-200/40 dark:border-white/10 flex items-center justify-between">
                         <span className="text-[10px] opacity-60">
                           {formatTimestamp(msg.timestamp)}
                         </span>
@@ -472,8 +476,10 @@ export const ChatPane: React.FC<ChatPaneProps> = ({
                           onClick={() => markExpenseSettled(msg.id)}
                           className={`px-3 py-1 rounded-xl text-xs font-medium transition-all ${
                             msg.expense.isSettled
-                              ? 'bg-[#EEEEEE] dark:bg-[#252C21] text-slate-700 dark:text-slate-300 hover:bg-[#EAE2D6]'
-                              : 'bg-[#8B9A6E] hover:bg-[#79875F] text-white font-semibold shadow-xs'
+                              ? 'bg-zinc-200 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-300 dark:hover:bg-zinc-700'
+                              : isMe
+                              ? 'bg-white hover:bg-zinc-200 text-zinc-950 font-semibold shadow-xs'
+                              : 'bg-zinc-900 hover:bg-zinc-800 text-white dark:bg-white dark:hover:bg-zinc-200 dark:text-zinc-950 font-semibold shadow-xs'
                           }`}
                         >
                           {msg.expense.isSettled ? 'Mark Unsettled' : 'Mark Settled'}
@@ -485,12 +491,12 @@ export const ChatPane: React.FC<ChatPaneProps> = ({
                     <div
                       className={`p-4 rounded-3xl border shadow-sm ${
                         isMe
-                          ? 'bg-[#8B9A6E] text-white border-[#79875F]'
-                          : 'bg-[#F7F2EB] dark:bg-[#1E231B] border-[#EAE2D6] dark:border-[#353E2F] text-slate-900 dark:text-white'
+                          ? 'bg-zinc-950 text-white border-zinc-800'
+                          : 'bg-zinc-50 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white'
                       }`}
                     >
                       <div className="flex items-center gap-1.5 text-xs font-semibold mb-2 opacity-90">
-                        <Calendar className="w-4 h-4 text-[#EAE2D6]" />
+                        <Calendar className="w-4 h-4" />
                         <span>Meeting & Event Note</span>
                       </div>
                       <div className="text-sm font-bold">{msg.meeting.title}</div>
@@ -523,22 +529,22 @@ export const ChatPane: React.FC<ChatPaneProps> = ({
                     <div
                       className={`px-4 py-2.5 rounded-2xl text-xs sm:text-sm leading-relaxed shadow-xs ${
                         isMe
-                          ? 'bg-[#8B9A6E] text-white rounded-br-xs'
-                          : 'bg-[#F7F2EB] dark:bg-[#252C21] text-[#2D3325] dark:text-[#F7F2EB] border border-[#EAE2D6] dark:border-[#353E2F] rounded-bl-xs'
+                          ? 'bg-zinc-950 text-white dark:bg-white dark:text-zinc-950 rounded-br-xs'
+                          : 'bg-zinc-100 dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 border border-zinc-200 dark:border-zinc-800 rounded-bl-xs'
                       }`}
                     >
                       <p className="whitespace-pre-wrap break-words">{msg.content}</p>
 
                       <div
                         className={`flex items-center justify-end gap-1 text-[10px] mt-1 ${
-                          isMe ? 'text-[#EAF0DE]' : 'text-[#8F9882]'
+                          isMe ? 'text-zinc-400 dark:text-zinc-600' : 'text-zinc-400'
                         }`}
                       >
                         <span>{formatTimestamp(msg.timestamp)}</span>
                         {isMe && (
                           <span>
                             {msg.status === 'read' ? (
-                              <CheckCheck className="w-3.5 h-3.5 text-[#EAF0DE]" />
+                              <CheckCheck className="w-3.5 h-3.5 text-white dark:text-zinc-950" />
                             ) : (
                               <Check className="w-3.5 h-3.5" />
                             )}
