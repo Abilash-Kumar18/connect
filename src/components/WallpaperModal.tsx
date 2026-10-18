@@ -4,13 +4,10 @@ import {
   Image as ImageIcon,
   Upload,
   X,
-  Sliders,
   Trash2,
   Check,
   Eye,
   Sparkles,
-  Layers,
-  RotateCcw,
 } from 'lucide-react';
 import { useConnect } from '../context/ConnectContext';
 import { BackgroundSettings } from '../types';
@@ -95,9 +92,8 @@ export const WallpaperModal: React.FC<WallpaperModalProps> = ({
   channelId,
   channelName,
 }) => {
-  const { activeChannel, getChatBackground, setChatBackground, customBackgrounds } = useConnect();
+  const { activeChannel, getChatBackground, setChatBackground } = useConnect();
   const targetChannelId = channelId || activeChannel?.id || 'chan_general';
-  const targetName = channelName || activeChannel?.name || 'Current Channel';
 
   const currentBg = getChatBackground(targetChannelId);
 
@@ -105,7 +101,6 @@ export const WallpaperModal: React.FC<WallpaperModalProps> = ({
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [opacity, setOpacity] = useState<number>(0.35);
   const [blur, setBlur] = useState<number>(0);
-  const [applyScope, setApplyScope] = useState<'channel' | 'global'>('channel');
   const [isProcessing, setIsProcessing] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
@@ -173,23 +168,22 @@ export const WallpaperModal: React.FC<WallpaperModalProps> = ({
   };
 
   const handleSave = () => {
-    const targetKey = applyScope === 'global' ? 'global' : targetChannelId;
     if (selectedImage) {
       const settings: BackgroundSettings = {
         imageUrl: selectedImage,
         opacity,
         blur,
       };
-      setChatBackground(targetKey, settings);
+      setChatBackground(targetChannelId, settings);
     } else {
-      setChatBackground(targetKey, null);
+      setChatBackground(targetChannelId, null);
     }
     onClose();
   };
 
   const handleRemove = () => {
-    const targetKey = applyScope === 'global' ? 'global' : targetChannelId;
-    setChatBackground(targetKey, null);
+    setChatBackground(targetChannelId, null);
+    setChatBackground('global', null);
     setSelectedImage(null);
     onClose();
   };
@@ -233,32 +227,6 @@ export const WallpaperModal: React.FC<WallpaperModalProps> = ({
               className="p-2 rounded-xl text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
             >
               <X className="w-5 h-5" />
-            </button>
-          </div>
-
-          {/* Scope Selector */}
-          <div className="mt-4 flex items-center justify-between p-1 bg-zinc-100 dark:bg-zinc-900 rounded-2xl border border-zinc-200/80 dark:border-zinc-800">
-            <button
-              type="button"
-              onClick={() => setApplyScope('channel')}
-              className={`flex-1 py-1.5 px-3 rounded-xl text-xs font-semibold transition-all ${
-                applyScope === 'channel'
-                  ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white shadow-xs'
-                  : 'text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200'
-              }`}
-            >
-              #{targetName} Only
-            </button>
-            <button
-              type="button"
-              onClick={() => setApplyScope('global')}
-              className={`flex-1 py-1.5 px-3 rounded-xl text-xs font-semibold transition-all ${
-                applyScope === 'global'
-                  ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white shadow-xs'
-                  : 'text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200'
-              }`}
-            >
-              All Channels (Global)
             </button>
           </div>
 
