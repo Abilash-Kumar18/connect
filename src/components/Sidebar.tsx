@@ -57,8 +57,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ onOpenNewChannel, onOpenAuth }
     resetToDefaults,
   } = useConnect();
 
-  const [showStatusEditor, setShowStatusEditor] = useState(false);
-  const [newStatusText, setNewStatusText] = useState(currentUser.statusText);
   const [showUserMenu, setShowUserMenu] = useState(false);
 
   const navigate = useNavigate();
@@ -91,16 +89,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ onOpenNewChannel, onOpenAuth }
       return timeB - timeA;
     });
 
-  const handleStatusSave = (e: React.FormEvent) => {
-    e.preventDefault();
-    updateUserStatus(newStatusText, currentUser.statusState);
-    setShowStatusEditor(false);
-  };
-
   const handleSwitchUser = () => {
     const nextId = currentUser.id === 'alex' ? 'jordan' : 'alex';
     setCurrentUserId(nextId);
-    setNewStatusText(nextId === 'alex' ? 'Focusing on final project prep 🎯' : 'In Campus Library 📚');
   };
 
   const formatRelativeTime = (timestamp?: number) => {
@@ -143,6 +134,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ onOpenNewChannel, onOpenAuth }
 
           <div className="flex items-center gap-1">
             <button
+              onClick={onOpenNewChannel}
+              title="Create new topic channel"
+              className="p-1.5 rounded-lg text-[#788566] dark:text-[#B7C2A5] hover:text-[#2D3325] dark:hover:text-white hover:bg-[#EAE2D6] dark:hover:bg-[#2A3324] transition-colors"
+            >
+              <Plus className="w-4 h-4" />
+            </button>
+            <button
               onClick={toggleDarkMode}
               title={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
               className="p-1.5 rounded-lg text-[#788566] dark:text-[#B7C2A5] hover:text-[#2D3325] dark:hover:text-white hover:bg-[#EAE2D6] dark:hover:bg-[#2A3324] transition-colors"
@@ -169,7 +167,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ onOpenNewChannel, onOpenAuth }
         {/* Current User Card & Duo Switcher */}
         <div className="mt-3.5 p-2.5 rounded-2xl bg-[#EAE2D6]/60 dark:bg-[#252C21] border border-[#EAE2D6] dark:border-[#353E2F] flex items-center justify-between">
           <div
-            onClick={() => setShowStatusEditor(!showStatusEditor)}
+            onClick={() => {
+              navigate('/profile');
+              setIsMobileDrawerOpen(false);
+            }}
             className="flex items-center gap-2.5 cursor-pointer min-w-0 flex-1 group"
           >
             <div className="relative">
@@ -188,9 +189,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ onOpenNewChannel, onOpenAuth }
                 <span>{currentUser.name}</span>
                 <span className="text-[10px] text-[#788566] dark:text-[#A7B395] font-normal">You</span>
               </div>
-              <p className="text-[11px] text-[#586348] dark:text-[#C5CEB8] truncate group-hover:text-[#8B9A6E] transition-colors">
-                {currentUser.statusText}
-              </p>
             </div>
           </div>
 
@@ -269,54 +267,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ onOpenNewChannel, onOpenAuth }
             );
           })}
         </div>
-
-        {/* Status editor dropdown */}
-        <AnimatePresence>
-          {showStatusEditor && (
-            <motion.form
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              onSubmit={handleStatusSave}
-              className="mt-2 pt-2 border-t border-slate-200 dark:border-slate-700"
-            >
-              <input
-                type="text"
-                value={newStatusText}
-                onChange={(e) => setNewStatusText(e.target.value)}
-                placeholder="Set status (e.g. In class, Studying, Coding)"
-                className="w-full px-2.5 py-1.5 rounded-lg border border-[#EAE2D6] dark:border-[#353E2F] bg-white dark:bg-[#1E231B] text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-[#8B9A6E]"
-              />
-              <div className="flex justify-end gap-1.5 mt-1.5">
-                <button
-                  type="button"
-                  onClick={() => setShowStatusEditor(false)}
-                  className="px-2 py-1 text-[10px] text-slate-500 hover:text-slate-700 dark:text-slate-400"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-2.5 py-1 text-[10px] font-semibold bg-[#8B9A6E] hover:bg-[#79875F] text-white rounded-md"
-                >
-                  Save
-                </button>
-              </div>
-            </motion.form>
-          )}
-        </AnimatePresence>
       </div>
 
-      {/* New Topic Button & Search Bar */}
+      {/* Search Bar & Filter Categories */}
       <div className="p-3 space-y-2 border-b border-[#EAE2D6] dark:border-[#353E2F]">
-        <button
-          onClick={onOpenNewChannel}
-          className="w-full py-2.5 px-3.5 rounded-xl bg-[#8B9A6E] hover:bg-[#79875F] text-white text-xs font-semibold flex items-center justify-center gap-2 shadow-sm transition-all active:scale-[0.98]"
-        >
-          <Plus className="w-4 h-4" />
-          <span>New Topic Channel</span>
-        </button>
-
         {/* Search */}
         <div className="relative">
           <Search className="w-3.5 h-3.5 text-[#788566] dark:text-[#A7B395] absolute left-3 top-2.5" />

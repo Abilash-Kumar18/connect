@@ -6,7 +6,7 @@ export const INITIAL_USERS: Record<string, User> = {
     name: 'Alex Morgan',
     handle: '@alex',
     avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80',
-    statusText: 'Focusing on final project prep 🎯',
+    statusText: '',
     statusState: 'online',
     role: 'Co-Pilot & Project Lead',
   },

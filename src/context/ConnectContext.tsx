@@ -167,7 +167,11 @@ export const ConnectProvider: React.FC<{ children: React.ReactNode }> = ({ child
     const saved = localStorage.getItem(STORAGE_KEYS.USERS);
     if (saved) {
       try {
-        return JSON.parse(saved);
+        const parsed = JSON.parse(saved);
+        if (parsed.alex && parsed.alex.statusText === 'Focusing on final project prep 🎯') {
+          parsed.alex.statusText = '';
+        }
+        return parsed;
       } catch {
         // fallback
       }

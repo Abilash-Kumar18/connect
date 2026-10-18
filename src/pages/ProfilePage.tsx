@@ -47,7 +47,7 @@ export const ProfilePage: React.FC = () => {
   const handleSwitchUser = () => {
     const nextId = currentUser.id === 'alex' ? 'jordan' : 'alex';
     setCurrentUserId(nextId);
-    setStatusText(nextId === 'alex' ? 'Focusing on final project prep 🎯' : 'In Campus Library 📚');
+    setStatusText(nextId === 'alex' ? '' : 'In Campus Library 📚');
   };
 
   return (
