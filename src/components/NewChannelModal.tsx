@@ -85,9 +85,6 @@ export const NewChannelModal: React.FC<NewChannelModalProps> = ({ isOpen, onClos
               <h3 className="text-base sm:text-lg font-bold font-display text-[#2D3325] dark:text-[#F7F2EB]">
                 Create Topic Channel
               </h3>
-              <p className="text-xs text-[#788566] dark:text-[#A7B395] mt-0.5">
-                Organized context spaces for your shared plans & tasks
-              </p>
             </div>
           </div>
           <button
