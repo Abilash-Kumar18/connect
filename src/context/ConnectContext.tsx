@@ -13,12 +13,20 @@ import {
   ContactData,
 } from '../types';
 import { INITIAL_USERS, INITIAL_CHANNELS, INITIAL_MESSAGES } from '../data/seedData';
+import { StickerItem, INITIAL_STICKERS } from '../data/stickersData';
 
 interface ConnectContextType {
   currentUser: User;
   partnerUser: User;
   setCurrentUserId: (id: string) => void;
   updateUserStatus: (statusText: string, state: User['statusState']) => void;
+  updateUserProfile: (data: Partial<User>) => void;
+  stickers: StickerItem[];
+  enabledStickerIds: string[];
+  toggleStickerToShow: (id: string) => void;
+  setAllStickersToShow: (enabled: boolean) => void;
+  addCustomSticker: (sticker: { name: string; url: string; emojiBadge?: string }) => void;
+  removeCustomSticker: (id: string) => void;
   channels: Channel[];
   activeChannelId: string;
   setActiveChannelId: (id: string) => void;
@@ -134,6 +142,8 @@ const STORAGE_KEYS = {
   SOUND: 'connect_sound_v2',
   AUTH: 'connect_auth_state_v2',
   CHAT_BG: 'connect_chat_bg_v2',
+  STICKERS: 'connect_stickers_v2',
+  ENABLED_STICKERS: 'connect_enabled_stickers_v2',
 };
 
 const deduplicateMessages = (msgList: Message[]): Message[] => {
@@ -263,6 +273,77 @@ export const ConnectProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [searchQuery, setSearchQuery] = useState('');
   const [channelFilter, setChannelFilter] = useState<ChannelCategory | 'all' | 'pinned'>('all');
   const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
+
+  // Sticker configuration state (Profile & Stickers to show)
+  const [stickers, setStickers] = useState<StickerItem[]>(() => {
+    const saved = localStorage.getItem(STORAGE_KEYS.STICKERS);
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch {}
+    }
+    return INITIAL_STICKERS;
+  });
+
+  const [enabledStickerIds, setEnabledStickerIds] = useState<string[]>(() => {
+    const saved = localStorage.getItem(STORAGE_KEYS.ENABLED_STICKERS);
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch {}
+    }
+    return INITIAL_STICKERS.map((s) => s.id);
+  });
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEYS.STICKERS, JSON.stringify(stickers));
+  }, [stickers]);
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEYS.ENABLED_STICKERS, JSON.stringify(enabledStickerIds));
+  }, [enabledStickerIds]);
+
+  const toggleStickerToShow = (id: string) => {
+    setEnabledStickerIds((prev) =>
+      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
+    );
+  };
+
+  const setAllStickersToShow = (enabled: boolean) => {
+    setEnabledStickerIds(enabled ? stickers.map((s) => s.id) : []);
+  };
+
+  const addCustomSticker = (newStk: { name: string; url: string; emojiBadge?: string }) => {
+    const item: StickerItem = {
+      id: `custom_stk_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+      name: newStk.name,
+      url: newStk.url,
+      emojiBadge: newStk.emojiBadge || '✨',
+      category: 'custom',
+    };
+    setStickers((prev) => [item, ...prev]);
+    setEnabledStickerIds((prev) => [item.id, ...prev]);
+  };
+
+  const removeCustomSticker = (id: string) => {
+    setStickers((prev) => prev.filter((s) => s.id !== id));
+    setEnabledStickerIds((prev) => prev.filter((i) => i !== id));
+  };
+
+  const updateUserProfile = (updatedFields: Partial<User>) => {
+    setUsers((prev) => {
+      const next = {
+        ...prev,
+        [currentUserId]: {
+          ...prev[currentUserId],
+          ...updatedFields,
+        },
+      };
+      localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(next));
+      broadcastEvent({ type: 'UPDATE_USERS', users: next });
+      return next;
+    });
+  };
 
   // Sync dark mode class with DOM
   useEffect(() => {
@@ -868,6 +949,13 @@ export const ConnectProvider: React.FC<{ children: React.ReactNode }> = ({ child
     partnerUser,
     setCurrentUserId,
     updateUserStatus,
+    updateUserProfile,
+    stickers,
+    enabledStickerIds,
+    toggleStickerToShow,
+    setAllStickersToShow,
+    addCustomSticker,
+    removeCustomSticker,
     channels,
     activeChannelId,
     setActiveChannelId,
