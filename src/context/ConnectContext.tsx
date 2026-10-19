@@ -1,5 +1,17 @@
 import React, { createContext, useContext, useState, useEffect, useMemo, useCallback, useRef } from 'react';
-import { User, Channel, Message, ExpenseSummary, ChannelCategory, ExpenseData, MessageType, BackgroundSettings } from '../types';
+import {
+  User,
+  Channel,
+  Message,
+  ExpenseSummary,
+  ChannelCategory,
+  ExpenseData,
+  MessageType,
+  BackgroundSettings,
+  AttachmentData,
+  PollData,
+  ContactData,
+} from '../types';
 import { INITIAL_USERS, INITIAL_CHANNELS, INITIAL_MESSAGES } from '../data/seedData';
 
 interface ConnectContextType {
@@ -27,8 +39,13 @@ interface ConnectContextType {
     isImportant?: boolean;
     expense?: ExpenseData;
     meeting?: any;
+    attachment?: AttachmentData;
+    poll?: PollData;
+    contact?: ContactData;
+    stickerUrl?: string;
     overrideSenderId?: string;
   }) => void;
+  votePoll: (messageId: string, optionId: string) => void;
   toggleImportantMessage: (messageId: string) => void;
   togglePinMessageInChat: (messageId: string) => void;
   deleteMessage: (messageId: string) => void;
@@ -496,6 +513,10 @@ export const ConnectProvider: React.FC<{ children: React.ReactNode }> = ({ child
     isImportant = false,
     expense,
     meeting,
+    attachment,
+    poll,
+    contact,
+    stickerUrl,
     overrideSenderId,
   }: {
     content: string;
@@ -503,6 +524,10 @@ export const ConnectProvider: React.FC<{ children: React.ReactNode }> = ({ child
     isImportant?: boolean;
     expense?: ExpenseData;
     meeting?: any;
+    attachment?: AttachmentData;
+    poll?: PollData;
+    contact?: ContactData;
+    stickerUrl?: string;
     overrideSenderId?: string;
   }) => {
     const senderId = overrideSenderId || currentUserId;
@@ -518,6 +543,10 @@ export const ConnectProvider: React.FC<{ children: React.ReactNode }> = ({ child
       status: 'delivered',
       expense,
       meeting,
+      attachment,
+      poll,
+      contact,
+      stickerUrl,
     };
 
     // Update messages
@@ -538,6 +567,18 @@ export const ConnectProvider: React.FC<{ children: React.ReactNode }> = ({ child
             snippet = `💸 ${expense.title || 'Expense'}: ${expense.currency}${expense.amount.toFixed(2)}`;
           } else if (type === 'meeting' && meeting) {
             snippet = `📅 ${meeting.title || 'Meeting'}: ${meeting.date || ''}`;
+          } else if (type === 'media') {
+            snippet = `📷 Photo / Video`;
+          } else if (type === 'document') {
+            snippet = `📄 ${attachment?.name || 'Document'}`;
+          } else if (type === 'audio') {
+            snippet = `🎤 Voice Note`;
+          } else if (type === 'poll') {
+            snippet = `📊 Poll: ${poll?.question || ''}`;
+          } else if (type === 'contact') {
+            snippet = `👤 Contact: ${contact?.name || ''}`;
+          } else if (type === 'sticker') {
+            snippet = `✨ Sticker`;
           }
           return {
             ...c,
@@ -558,6 +599,45 @@ export const ConnectProvider: React.FC<{ children: React.ReactNode }> = ({ child
         playSoundEffect('receive');
       }
     }
+  };
+
+  const votePoll = (messageId: string, optionId: string) => {
+    setMessages((prev) => {
+      const next = prev.map((msg) => {
+        if (msg.id !== messageId || !msg.poll) return msg;
+        const currentUserIdStr = currentUserId;
+        const allowsMultiple = msg.poll.allowsMultipleAnswers;
+
+        const updatedOptions = msg.poll.options.map((opt) => {
+          const hasVoted = opt.votes.includes(currentUserIdStr);
+          if (opt.id === optionId) {
+            return {
+              ...opt,
+              votes: hasVoted
+                ? opt.votes.filter((u) => u !== currentUserIdStr)
+                : [...opt.votes, currentUserIdStr],
+            };
+          } else if (!allowsMultiple) {
+            return {
+              ...opt,
+              votes: opt.votes.filter((u) => u !== currentUserIdStr),
+            };
+          }
+          return opt;
+        });
+
+        return {
+          ...msg,
+          poll: {
+            ...msg.poll,
+            options: updatedOptions,
+          },
+        };
+      });
+      broadcastEvent({ type: 'UPDATE_MESSAGES', messages: next });
+      return next;
+    });
+    if (soundEnabled) playSoundEffect('pop');
   };
 
   const toggleImportantMessage = (messageId: string) => {
@@ -797,6 +877,7 @@ export const ConnectProvider: React.FC<{ children: React.ReactNode }> = ({ child
     togglePinChannel,
     deleteChannel,
     sendMessage,
+    votePoll,
     toggleImportantMessage,
     togglePinMessageInChat,
     deleteMessage,

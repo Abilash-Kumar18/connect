@@ -34,7 +34,17 @@ export interface Channel {
   colorTheme?: string;
 }
 
-export type MessageType = 'text' | 'expense' | 'meeting' | 'note';
+export type MessageType =
+  | 'text'
+  | 'expense'
+  | 'meeting'
+  | 'note'
+  | 'media'
+  | 'document'
+  | 'audio'
+  | 'contact'
+  | 'poll'
+  | 'sticker';
 
 export type SplitType = 'equally' | 'you_owe_full' | 'partner_owes_full';
 
@@ -59,6 +69,32 @@ export interface MeetingData {
   isCompleted?: boolean;
 }
 
+export interface AttachmentData {
+  name: string;
+  url?: string;
+  size?: string;
+  mimeType?: string;
+  duration?: string;
+}
+
+export interface PollOption {
+  id: string;
+  text: string;
+  votes: string[]; // userIds
+}
+
+export interface PollData {
+  question: string;
+  options: PollOption[];
+  allowsMultipleAnswers?: boolean;
+}
+
+export interface ContactData {
+  name: string;
+  phone?: string;
+  email?: string;
+}
+
 export interface Message {
   id: string;
   channelId: string;
@@ -72,6 +108,10 @@ export interface Message {
   reactions?: Record<string, string[]>; // emoji -> array of userIds
   expense?: ExpenseData;
   meeting?: MeetingData;
+  attachment?: AttachmentData;
+  poll?: PollData;
+  contact?: ContactData;
+  stickerUrl?: string;
 }
 
 export interface ExpenseSummary {
