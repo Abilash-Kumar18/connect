@@ -192,7 +192,14 @@ export const ConnectProvider: React.FC<{ children: React.ReactNode }> = ({ child
     const saved = localStorage.getItem(STORAGE_KEYS.CHANNELS);
     if (saved) {
       try {
-        return JSON.parse(saved);
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) {
+          return parsed.map((c: Channel) => ({
+            ...c,
+            currency: c.currency === '$' || !c.currency ? '₹' : c.currency,
+            lastMessageSnippet: c.lastMessageSnippet?.replace(/\$/g, '₹') || c.lastMessageSnippet,
+          }));
+        }
       } catch {
         // fallback
       }
@@ -213,7 +220,20 @@ export const ConnectProvider: React.FC<{ children: React.ReactNode }> = ({ child
       try {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed)) {
-          return deduplicateMessages(parsed);
+          const migrated = parsed.map((m: Message) => {
+            if (m.expense && (m.expense.currency === '$' || !m.expense.currency)) {
+              return {
+                ...m,
+                content: m.content ? m.content.replace(/\$/g, '₹') : m.content,
+                expense: {
+                  ...m.expense,
+                  currency: '₹',
+                },
+              };
+            }
+            return m;
+          });
+          return deduplicateMessages(migrated);
         }
       } catch {
         // fallback
@@ -399,7 +419,7 @@ export const ConnectProvider: React.FC<{ children: React.ReactNode }> = ({ child
     description,
     category,
     icon,
-    currency = '$',
+    currency = '₹',
   }: {
     name: string;
     description: string;

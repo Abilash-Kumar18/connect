@@ -264,7 +264,7 @@ export const ChatPane: React.FC<ChatPaneProps> = ({
               <Receipt className="w-3.5 h-3.5 text-[#8B9A6E]" />
               <span>
                 {Math.abs(channelSummary.netBalance) > 0.01
-                  ? `${channelSummary.netBalance > 0 ? 'Jordan owes' : 'You owe'} ${activeChannel.currency || '$'}${Math.abs(channelSummary.netBalance).toFixed(2)}`
+                  ? `${channelSummary.netBalance > 0 ? 'Jordan owes' : 'You owe'} ${activeChannel.currency === '$' ? '₹' : (activeChannel.currency || '₹')}${Math.abs(channelSummary.netBalance).toFixed(2)}`
                   : 'Settled'}
               </span>
             </button>
@@ -409,9 +409,12 @@ export const ChatPane: React.FC<ChatPaneProps> = ({
       </div>
 
       {/* 3. Messages Feed */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 relative z-10">
+      <div className="flex-1 overflow-y-auto px-4 pt-3 pb-2 space-y-3 relative z-10 flex flex-col">
+        {/* Spacer to push messages down snugly above the message box like WhatsApp/iMessage */}
+        <div className="mt-auto" />
+
         {filteredMessages.length === 0 ? (
-          <div className="text-center py-16 px-4">
+          <div className="text-center py-12 px-4 my-auto">
             <div className="w-12 h-12 rounded-2xl bg-[#EAE2D6]/60 dark:bg-[#252C21] flex items-center justify-center text-[#8B9A6E] mx-auto mb-3">
               <ChannelIcon name={activeChannel.icon} className="w-6 h-6" />
             </div>
@@ -491,13 +494,13 @@ export const ChatPane: React.FC<ChatPaneProps> = ({
                         <div className={`text-2xl font-bold font-mono tabular-nums mt-1 ${
                           isMe ? 'text-white' : 'text-zinc-900 dark:text-white'
                         }`}>
-                          {msg.expense.currency}
+                          {msg.expense.currency === '$' ? '₹' : (msg.expense.currency || '₹')}
                           {msg.expense.amount.toFixed(2)}
                         </div>
                         <div className="text-[11px] opacity-75 mt-1">
                           Paid by {msg.expense.paidBy === 'alex' ? 'Alex' : 'Jordan'} ·{' '}
                           {msg.expense.splitType === 'equally'
-                            ? `Split equally (${msg.expense.currency}${(msg.expense.amount / 2).toFixed(2)} each)`
+                            ? `Split equally (${msg.expense.currency === '$' ? '₹' : (msg.expense.currency || '₹')}${(msg.expense.amount / 2).toFixed(2)} each)`
                             : 'Direct non-split'}
                         </div>
                       </div>
@@ -676,13 +679,13 @@ export const ChatPane: React.FC<ChatPaneProps> = ({
             );
           })
         )}
-        <div ref={messagesEndRef} />
+        <div ref={messagesEndRef} className="h-0 w-0 -mt-3 pointer-events-none" />
       </div>
 
       {/* 4. Message Input & Quick Action Bar */}
-      <div className="p-3 bg-[#F7F2EB]/95 dark:bg-[#1E231B]/95 border-t border-[#EAE2D6] dark:border-[#353E2F] backdrop-blur-md shrink-0">
+      <div className="px-3 pt-2 pb-2.5 bg-[#F7F2EB]/95 dark:bg-[#1E231B]/95 border-t border-[#EAE2D6] dark:border-[#353E2F] backdrop-blur-md shrink-0">
         {/* Quick Action Chips Row */}
-        <div className="flex items-center gap-1.5 pb-2 overflow-x-auto scrollbar-none text-xs">
+        <div className="flex items-center gap-1.5 pb-1.5 overflow-x-auto scrollbar-none text-xs">
           <button
             type="button"
             onClick={onOpenExpenseModal}

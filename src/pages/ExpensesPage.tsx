@@ -8,7 +8,7 @@ import {
   AlertCircle,
   ArrowRight,
   Filter,
-  DollarSign,
+  IndianRupee,
   TrendingDown,
   TrendingUp,
   Tag,
@@ -160,7 +160,7 @@ export const ExpensesPage: React.FC<ExpensesPageProps> = ({ onOpenExpenseModal }
                     {isAlexOwed ? 'Jordan owes Alex' : 'Alex owes Jordan'}
                   </div>
                   <div className="text-3xl font-extrabold font-mono text-[#586348] dark:text-[#C5CEB8] mt-0.5">
-                    ${Math.abs(netBalance).toFixed(2)}
+                    ₹{Math.abs(netBalance).toFixed(2)}
                   </div>
                 </div>
               )}
@@ -177,11 +177,11 @@ export const ExpensesPage: React.FC<ExpensesPageProps> = ({ onOpenExpenseModal }
               <span className="w-2.5 h-2.5 rounded-full bg-[#8B9A6E]" />
             </div>
             <div className="text-2xl font-bold font-mono text-[#2D3325] dark:text-white mt-3">
-              ${user1Paid.toFixed(2)}
+              ₹{user1Paid.toFixed(2)}
             </div>
             <div className="mt-2 text-[11px] text-[#8F9882] flex items-center justify-between">
               <span>Share: {totalAmount > 0 ? Math.round((user1Paid / totalAmount) * 100) : 0}%</span>
-              <span>Total spent: ${totalAmount.toFixed(2)}</span>
+              <span>Total spent: ₹{totalAmount.toFixed(2)}</span>
             </div>
           </div>
 
@@ -192,11 +192,11 @@ export const ExpensesPage: React.FC<ExpensesPageProps> = ({ onOpenExpenseModal }
               <span className="w-2.5 h-2.5 rounded-full bg-[#67754E]" />
             </div>
             <div className="text-2xl font-bold font-mono text-[#2D3325] dark:text-white mt-3">
-              ${user2Paid.toFixed(2)}
+              ₹{user2Paid.toFixed(2)}
             </div>
             <div className="mt-2 text-[11px] text-[#8F9882] flex items-center justify-between">
               <span>Share: {totalAmount > 0 ? Math.round((user2Paid / totalAmount) * 100) : 0}%</span>
-              <span>Total spent: ${totalAmount.toFixed(2)}</span>
+              <span>Total spent: ₹{totalAmount.toFixed(2)}</span>
             </div>
           </div>
         </div>
@@ -227,7 +227,7 @@ export const ExpensesPage: React.FC<ExpensesPageProps> = ({ onOpenExpenseModal }
                           {channel.name}
                         </div>
                         <div className="text-[11px] text-[#8F9882]">
-                          {chanExpenses.length} entries · ${chanTotal.toFixed(2)} total
+                          {chanExpenses.length} entries · ₹{chanTotal.toFixed(2)} total
                         </div>
                       </div>
                     </div>
@@ -294,7 +294,7 @@ export const ExpensesPage: React.FC<ExpensesPageProps> = ({ onOpenExpenseModal }
                             : 'bg-[#EAE2D6] text-[#788566]'
                         }`}
                       >
-                        <DollarSign className="w-5 h-5 text-[#8B9A6E]" />
+                        <IndianRupee className="w-5 h-5 text-[#8B9A6E]" />
                       </div>
                       <div>
                         <div className="text-xs font-bold text-[#2D3325] dark:text-white flex items-center gap-2">
@@ -331,7 +331,7 @@ export const ExpensesPage: React.FC<ExpensesPageProps> = ({ onOpenExpenseModal }
                     <div className="flex items-center justify-between sm:justify-end gap-3 self-end sm:self-center">
                       <div className="text-right">
                         <div className="text-sm font-extrabold font-mono tabular-nums text-[#2D3325] dark:text-white">
-                          ${exp.amount.toFixed(2)}
+                          {exp.currency === '$' ? '₹' : (exp.currency || '₹')}{exp.amount.toFixed(2)}
                         </div>
                         <div className="text-[10px] text-[#8F9882]">
                           {new Date(msg.timestamp).toLocaleDateString([], {

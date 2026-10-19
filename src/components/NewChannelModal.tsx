@@ -26,7 +26,7 @@ export const NewChannelModal: React.FC<NewChannelModalProps> = ({ isOpen, onClos
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState<ChannelCategory>('general');
   const [selectedIcon, setSelectedIcon] = useState('MessageCircle');
-  const [currency, setCurrency] = useState('$');
+  const [currency, setCurrency] = useState('₹');
   const [error, setError] = useState('');
 
   if (!isOpen) return null;

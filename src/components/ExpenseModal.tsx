@@ -23,7 +23,7 @@ const EXPENSE_CATEGORIES = [
 
 export const ExpenseModal: React.FC<ExpenseModalProps> = ({ isOpen, onClose }) => {
   const { activeChannel, currentUser, partnerUser, sendMessage } = useConnect();
-  const currency = activeChannel?.currency || '$';
+  const currency = activeChannel?.currency === '$' ? '₹' : (activeChannel?.currency || '₹');
 
   const [amount, setAmount] = useState('');
   const [title, setTitle] = useState('');

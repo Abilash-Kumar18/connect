@@ -50,9 +50,9 @@ export const INITIAL_CHANNELS: Channel[] = [
     pinnedAt: now - 4 * hour,
     createdAt: now - 28 * 24 * hour,
     unreadCount: 1,
-    lastMessageSnippet: '💸 Dinner at Bistro 9: $44.50 split equally',
+    lastMessageSnippet: '💸 Dinner at Bistro 9: ₹44.50 split equally',
     lastMessageTimestamp: now - 35 * minute,
-    currency: '$',
+    currency: '₹',
     colorTheme: 'emerald',
   },
   {
@@ -66,7 +66,7 @@ export const INITIAL_CHANNELS: Channel[] = [
     unreadCount: 0,
     lastMessageSnippet: 'Got both spiral-bound copies ready from Sharma Xerox',
     lastMessageTimestamp: now - 2 * hour,
-    currency: '$',
+    currency: '₹',
     colorTheme: 'amber',
   },
   {
@@ -151,7 +151,7 @@ export const INITIAL_MESSAGES: Message[] = [
     status: 'read',
     expense: {
       amount: 38.60,
-      currency: '$',
+      currency: '₹',
       category: 'Groceries',
       title: 'Trader Joe groceries & pantry essentials',
       paidBy: 'alex',
@@ -171,7 +171,7 @@ export const INITIAL_MESSAGES: Message[] = [
     status: 'read',
     expense: {
       amount: 14.80,
-      currency: '$',
+      currency: '₹',
       category: 'Coffee & Snacks',
       title: 'Blue Bottle morning coffees',
       paidBy: 'jordan',
@@ -192,7 +192,7 @@ export const INITIAL_MESSAGES: Message[] = [
     status: 'delivered',
     expense: {
       amount: 44.50,
-      currency: '$',
+      currency: '₹',
       category: 'Dinner',
       title: 'Bistro 9 post-lab pasta & sodas',
       paidBy: 'alex',
@@ -223,7 +223,7 @@ export const INITIAL_MESSAGES: Message[] = [
     status: 'read',
     expense: {
       amount: 12.00,
-      currency: '$',
+      currency: '₹',
       category: 'Stationery & Xerox',
       title: 'Lab Manuals (4 spiral copies)',
       paidBy: 'jordan',
