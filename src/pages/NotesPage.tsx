@@ -198,7 +198,7 @@ export const NotesPage: React.FC = () => {
                     {msg.expense && (
                       <div className="mb-2 p-2.5 rounded-xl bg-[#EEEEEE] dark:bg-[#1E231B] border border-[#DFD6C7] dark:border-[#353E2F] text-xs text-[#2D3325] dark:text-[#F7F2EB] flex items-center justify-between">
                         <span className="font-semibold">{msg.expense.title}</span>
-                        <span className="font-mono font-bold text-[#586348]">${msg.expense.amount.toFixed(2)}</span>
+                        <span className="font-mono font-bold text-[#586348]">{msg.expense.currency === '$' ? '₹' : (msg.expense.currency || '₹')}{msg.expense.amount.toFixed(2)}</span>
                       </div>
                     )}
                     {msg.meeting && (

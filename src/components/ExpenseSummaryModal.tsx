@@ -22,7 +22,7 @@ export const ExpenseSummaryModal: React.FC<ExpenseSummaryModalProps> = ({ isOpen
   if (!isOpen || !activeChannel) return null;
 
   const summary = getChannelExpenseSummary(activeChannel.id);
-  const currency = activeChannel.currency || '$';
+  const currency = activeChannel.currency === '$' ? '₹' : (activeChannel.currency || '₹');
   const expenseMessages = activeMessages.filter((m) => m.type === 'expense' && m.expense);
 
   const isAlexOwed = summary.netBalance > 0.01;
@@ -158,12 +158,12 @@ export const ExpenseSummaryModal: React.FC<ExpenseSummaryModalProps> = ({ isOpen
                     <div className="flex items-center gap-3">
                       <div className="text-right">
                         <div className="font-bold tabular-nums text-slate-900 dark:text-white">
-                          {exp.currency}
+                          {exp.currency === '$' ? '₹' : (exp.currency || currency)}
                           {exp.amount.toFixed(2)}
                         </div>
                         <div className="text-[10px] text-slate-400">
                           {exp.splitType === 'equally'
-                            ? `${exp.currency}${(exp.amount / 2).toFixed(2)} ea`
+                            ? `${exp.currency === '$' ? '₹' : (exp.currency || currency)}${(exp.amount / 2).toFixed(2)} ea`
                             : 'Direct'}
                         </div>
                       </div>

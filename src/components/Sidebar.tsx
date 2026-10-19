@@ -18,16 +18,13 @@ import {
   RotateCcw,
   LogOut,
   SlidersHorizontal,
-  MessageCircle,
-  Receipt,
-  Calendar,
-  Star,
-  User,
+  Settings,
 } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useConnect } from '../context/ConnectContext';
 import { ChannelIcon } from './ChannelIcon';
 import { ChannelCategory, Channel } from '../types';
+import { SettingsModal } from './SettingsModal';
 
 interface SidebarProps {
   onOpenNewChannel: () => void;
@@ -58,6 +55,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ onOpenNewChannel, onOpenAuth }
   } = useConnect();
 
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -123,9 +121,22 @@ export const Sidebar: React.FC<SidebarProps> = ({ onOpenNewChannel, onOpenAuth }
               C
             </div>
             <div>
-              <span className="font-bold tracking-tight font-display text-base text-[#2D3325] dark:text-[#F7F2EB] group-hover:text-[#8B9A6E] transition-colors">
-                CONNECT
-              </span>
+              <div className="flex items-center gap-1.5">
+                <span className="font-bold tracking-tight font-display text-base text-[#2D3325] dark:text-[#F7F2EB] group-hover:text-[#8B9A6E] transition-colors">
+                  CONNECT
+                </span>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsSettingsOpen(true);
+                  }}
+                  title="Settings (User Details & Profile Stickers)"
+                  className="p-1 rounded-lg text-[#788566] dark:text-[#B7C2A5] hover:text-[#2D3325] dark:hover:text-white hover:bg-[#EAE2D6] dark:hover:bg-[#2A3324] transition-all hover:rotate-45"
+                >
+                  <Settings className="w-3.5 h-3.5" />
+                </button>
+              </div>
               <span className="text-[10px] text-[#788566] dark:text-[#B7C2A5] block font-normal -mt-0.5">
                 Duo Context Space
               </span>
@@ -133,6 +144,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ onOpenNewChannel, onOpenAuth }
           </div>
 
           <div className="flex items-center gap-1">
+            <button
+              onClick={() => setIsSettingsOpen(true)}
+              title="Settings & Profile Stickers"
+              className="p-1.5 rounded-lg text-[#788566] dark:text-[#B7C2A5] hover:text-[#2D3325] dark:hover:text-white hover:bg-[#EAE2D6] dark:hover:bg-[#2A3324] transition-colors"
+            >
+              <Settings className="w-4 h-4" />
+            </button>
             <button
               onClick={onOpenNewChannel}
               title="Create new topic channel"
@@ -201,71 +219,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ onOpenNewChannel, onOpenAuth }
             <ArrowRightLeft className="w-3 h-3 text-[#8B9A6E]" />
             <span className="hidden sm:inline">{partnerUser.name.split(' ')[0]}</span>
           </button>
-        </div>
-
-        {/* Top Primary Page Navigation (Individual URLs) */}
-        <div className="mt-3 grid grid-cols-5 gap-1 p-1 bg-[#EAE2D6] dark:bg-[#252C21] rounded-2xl border border-[#DFD6C7] dark:border-[#353E2F]">
-          {[
-            {
-              id: 'chat',
-              label: 'Chat',
-              icon: MessageCircle,
-              path: `/channels/${activeChannelId || 'chan_general'}`,
-              isMatch: location.pathname.startsWith('/channels'),
-            },
-            {
-              id: 'expenses',
-              label: 'Bills',
-              icon: Receipt,
-              path: '/expenses',
-              isMatch: location.pathname === '/expenses',
-            },
-            {
-              id: 'meetings',
-              label: 'Meets',
-              icon: Calendar,
-              path: '/meetings',
-              isMatch: location.pathname === '/meetings',
-            },
-            {
-              id: 'notes',
-              label: 'Notes',
-              icon: Star,
-              path: '/notes',
-              isMatch: location.pathname === '/notes',
-            },
-            {
-              id: 'profile',
-              label: 'Pair',
-              icon: User,
-              path: '/profile',
-              isMatch: location.pathname === '/profile',
-            },
-          ].map((item) => {
-            const Icon = item.icon;
-            return (
-              <button
-                key={item.id}
-                onClick={() => {
-                  navigate(item.path);
-                  setIsMobileDrawerOpen(false);
-                }}
-                className={`flex flex-col items-center justify-center py-1.5 px-1 rounded-xl text-[10px] font-semibold transition-all ${
-                  item.isMatch
-                    ? 'bg-[#8B9A6E] text-white shadow-xs'
-                    : 'text-[#586348] dark:text-[#C5CEB8] hover:bg-[#F7F2EB]/60 dark:hover:bg-[#1E231B]'
-                }`}
-                title={`Navigate to ${item.label} (${item.path})`}
-              >
-                <Icon
-                  className={`w-3.5 h-3.5 mb-0.5 ${
-                    item.isMatch ? 'text-white' : 'text-[#788566] dark:text-[#A7B395]'
-                  }`}
-                />
-                <span>{item.label}</span>
-              </button>
-            );
-          })}
         </div>
       </div>
 
@@ -511,6 +464,12 @@ export const Sidebar: React.FC<SidebarProps> = ({ onOpenNewChannel, onOpenAuth }
           </div>
         )}
       </AnimatePresence>
+
+      {/* Settings Modal (User Details & Profile Stickers) */}
+      <SettingsModal
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
+      />
     </>
   );
 };

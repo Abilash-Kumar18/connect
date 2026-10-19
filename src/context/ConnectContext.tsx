@@ -1,12 +1,32 @@
 import React, { createContext, useContext, useState, useEffect, useMemo, useCallback, useRef } from 'react';
-import { User, Channel, Message, ExpenseSummary, ChannelCategory, ExpenseData, MessageType } from '../types';
+import {
+  User,
+  Channel,
+  Message,
+  ExpenseSummary,
+  ChannelCategory,
+  ExpenseData,
+  MessageType,
+  BackgroundSettings,
+  AttachmentData,
+  PollData,
+  ContactData,
+} from '../types';
 import { INITIAL_USERS, INITIAL_CHANNELS, INITIAL_MESSAGES } from '../data/seedData';
+import { StickerItem, INITIAL_STICKERS } from '../data/stickersData';
 
 interface ConnectContextType {
   currentUser: User;
   partnerUser: User;
   setCurrentUserId: (id: string) => void;
   updateUserStatus: (statusText: string, state: User['statusState']) => void;
+  updateUserProfile: (data: Partial<User>) => void;
+  stickers: StickerItem[];
+  enabledStickerIds: string[];
+  toggleStickerToShow: (id: string) => void;
+  setAllStickersToShow: (enabled: boolean) => void;
+  addCustomSticker: (sticker: { name: string; url: string; emojiBadge?: string }) => void;
+  removeCustomSticker: (id: string) => void;
   channels: Channel[];
   activeChannelId: string;
   setActiveChannelId: (id: string) => void;
@@ -27,8 +47,13 @@ interface ConnectContextType {
     isImportant?: boolean;
     expense?: ExpenseData;
     meeting?: any;
+    attachment?: AttachmentData;
+    poll?: PollData;
+    contact?: ContactData;
+    stickerUrl?: string;
     overrideSenderId?: string;
   }) => void;
+  votePoll: (messageId: string, optionId: string) => void;
   toggleImportantMessage: (messageId: string) => void;
   togglePinMessageInChat: (messageId: string) => void;
   deleteMessage: (messageId: string) => void;
@@ -51,6 +76,9 @@ interface ConnectContextType {
   isMobileDrawerOpen: boolean;
   setIsMobileDrawerOpen: (open: boolean) => void;
   resetToDefaults: () => void;
+  customBackgrounds: Record<string, BackgroundSettings>;
+  getChatBackground: (channelId?: string) => BackgroundSettings | null;
+  setChatBackground: (target: string, settings: BackgroundSettings | null) => void;
 }
 
 const ConnectContext = createContext<ConnectContextType | undefined>(undefined);
@@ -113,6 +141,9 @@ const STORAGE_KEYS = {
   DARK_MODE: 'connect_dark_mode_v2',
   SOUND: 'connect_sound_v2',
   AUTH: 'connect_auth_state_v2',
+  CHAT_BG: 'connect_chat_bg_v2',
+  STICKERS: 'connect_stickers_v2',
+  ENABLED_STICKERS: 'connect_enabled_stickers_v2',
 };
 
 const deduplicateMessages = (msgList: Message[]): Message[] => {
@@ -188,7 +219,14 @@ export const ConnectProvider: React.FC<{ children: React.ReactNode }> = ({ child
     const saved = localStorage.getItem(STORAGE_KEYS.CHANNELS);
     if (saved) {
       try {
-        return JSON.parse(saved);
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) {
+          return parsed.map((c: Channel) => ({
+            ...c,
+            currency: c.currency === '$' || !c.currency ? '₹' : c.currency,
+            lastMessageSnippet: c.lastMessageSnippet?.replace(/\$/g, '₹') || c.lastMessageSnippet,
+          }));
+        }
       } catch {
         // fallback
       }
@@ -209,7 +247,20 @@ export const ConnectProvider: React.FC<{ children: React.ReactNode }> = ({ child
       try {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed)) {
-          return deduplicateMessages(parsed);
+          const migrated = parsed.map((m: Message) => {
+            if (m.expense && (m.expense.currency === '$' || !m.expense.currency)) {
+              return {
+                ...m,
+                content: m.content ? m.content.replace(/\$/g, '₹') : m.content,
+                expense: {
+                  ...m.expense,
+                  currency: '₹',
+                },
+              };
+            }
+            return m;
+          });
+          return deduplicateMessages(migrated);
         }
       } catch {
         // fallback
@@ -222,6 +273,77 @@ export const ConnectProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [searchQuery, setSearchQuery] = useState('');
   const [channelFilter, setChannelFilter] = useState<ChannelCategory | 'all' | 'pinned'>('all');
   const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
+
+  // Sticker configuration state (Profile & Stickers to show)
+  const [stickers, setStickers] = useState<StickerItem[]>(() => {
+    const saved = localStorage.getItem(STORAGE_KEYS.STICKERS);
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch {}
+    }
+    return INITIAL_STICKERS;
+  });
+
+  const [enabledStickerIds, setEnabledStickerIds] = useState<string[]>(() => {
+    const saved = localStorage.getItem(STORAGE_KEYS.ENABLED_STICKERS);
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch {}
+    }
+    return INITIAL_STICKERS.map((s) => s.id);
+  });
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEYS.STICKERS, JSON.stringify(stickers));
+  }, [stickers]);
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEYS.ENABLED_STICKERS, JSON.stringify(enabledStickerIds));
+  }, [enabledStickerIds]);
+
+  const toggleStickerToShow = (id: string) => {
+    setEnabledStickerIds((prev) =>
+      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
+    );
+  };
+
+  const setAllStickersToShow = (enabled: boolean) => {
+    setEnabledStickerIds(enabled ? stickers.map((s) => s.id) : []);
+  };
+
+  const addCustomSticker = (newStk: { name: string; url: string; emojiBadge?: string }) => {
+    const item: StickerItem = {
+      id: `custom_stk_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+      name: newStk.name,
+      url: newStk.url,
+      emojiBadge: newStk.emojiBadge || '✨',
+      category: 'custom',
+    };
+    setStickers((prev) => [item, ...prev]);
+    setEnabledStickerIds((prev) => [item.id, ...prev]);
+  };
+
+  const removeCustomSticker = (id: string) => {
+    setStickers((prev) => prev.filter((s) => s.id !== id));
+    setEnabledStickerIds((prev) => prev.filter((i) => i !== id));
+  };
+
+  const updateUserProfile = (updatedFields: Partial<User>) => {
+    setUsers((prev) => {
+      const next = {
+        ...prev,
+        [currentUserId]: {
+          ...prev[currentUserId],
+          ...updatedFields,
+        },
+      };
+      localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(next));
+      broadcastEvent({ type: 'UPDATE_USERS', users: next });
+      return next;
+    });
+  };
 
   // Sync dark mode class with DOM
   useEffect(() => {
@@ -262,6 +384,23 @@ export const ConnectProvider: React.FC<{ children: React.ReactNode }> = ({ child
     localStorage.setItem(STORAGE_KEYS.AUTH, String(isAuthenticated));
   }, [isAuthenticated]);
 
+  // Chat Wallpaper background state
+  const [customBackgrounds, setCustomBackgrounds] = useState<Record<string, BackgroundSettings>>(() => {
+    const saved = localStorage.getItem(STORAGE_KEYS.CHAT_BG);
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch {
+        // fallback
+      }
+    }
+    return {};
+  });
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEYS.CHAT_BG, JSON.stringify(customBackgrounds));
+  }, [customBackgrounds]);
+
   // Real-time multi-tab synchronization via BroadcastChannel
   useEffect(() => {
     if (typeof BroadcastChannel === 'undefined') return;
@@ -288,6 +427,8 @@ export const ConnectProvider: React.FC<{ children: React.ReactNode }> = ({ child
         setChannels(data.channels);
       } else if (data.type === 'UPDATE_USERS' && data.users) {
         setUsers(data.users);
+      } else if (data.type === 'UPDATE_BACKGROUNDS' && data.backgrounds) {
+        setCustomBackgrounds(data.backgrounds);
       }
     };
 
@@ -376,7 +517,7 @@ export const ConnectProvider: React.FC<{ children: React.ReactNode }> = ({ child
     description,
     category,
     icon,
-    currency = '$',
+    currency = '₹',
   }: {
     name: string;
     description: string;
@@ -453,6 +594,10 @@ export const ConnectProvider: React.FC<{ children: React.ReactNode }> = ({ child
     isImportant = false,
     expense,
     meeting,
+    attachment,
+    poll,
+    contact,
+    stickerUrl,
     overrideSenderId,
   }: {
     content: string;
@@ -460,6 +605,10 @@ export const ConnectProvider: React.FC<{ children: React.ReactNode }> = ({ child
     isImportant?: boolean;
     expense?: ExpenseData;
     meeting?: any;
+    attachment?: AttachmentData;
+    poll?: PollData;
+    contact?: ContactData;
+    stickerUrl?: string;
     overrideSenderId?: string;
   }) => {
     const senderId = overrideSenderId || currentUserId;
@@ -475,6 +624,10 @@ export const ConnectProvider: React.FC<{ children: React.ReactNode }> = ({ child
       status: 'delivered',
       expense,
       meeting,
+      attachment,
+      poll,
+      contact,
+      stickerUrl,
     };
 
     // Update messages
@@ -495,6 +648,18 @@ export const ConnectProvider: React.FC<{ children: React.ReactNode }> = ({ child
             snippet = `💸 ${expense.title || 'Expense'}: ${expense.currency}${expense.amount.toFixed(2)}`;
           } else if (type === 'meeting' && meeting) {
             snippet = `📅 ${meeting.title || 'Meeting'}: ${meeting.date || ''}`;
+          } else if (type === 'media') {
+            snippet = `📷 Photo / Video`;
+          } else if (type === 'document') {
+            snippet = `📄 ${attachment?.name || 'Document'}`;
+          } else if (type === 'audio') {
+            snippet = `🎤 Voice Note`;
+          } else if (type === 'poll') {
+            snippet = `📊 Poll: ${poll?.question || ''}`;
+          } else if (type === 'contact') {
+            snippet = `👤 Contact: ${contact?.name || ''}`;
+          } else if (type === 'sticker') {
+            snippet = `✨ Sticker`;
           }
           return {
             ...c,
@@ -515,6 +680,45 @@ export const ConnectProvider: React.FC<{ children: React.ReactNode }> = ({ child
         playSoundEffect('receive');
       }
     }
+  };
+
+  const votePoll = (messageId: string, optionId: string) => {
+    setMessages((prev) => {
+      const next = prev.map((msg) => {
+        if (msg.id !== messageId || !msg.poll) return msg;
+        const currentUserIdStr = currentUserId;
+        const allowsMultiple = msg.poll.allowsMultipleAnswers;
+
+        const updatedOptions = msg.poll.options.map((opt) => {
+          const hasVoted = opt.votes.includes(currentUserIdStr);
+          if (opt.id === optionId) {
+            return {
+              ...opt,
+              votes: hasVoted
+                ? opt.votes.filter((u) => u !== currentUserIdStr)
+                : [...opt.votes, currentUserIdStr],
+            };
+          } else if (!allowsMultiple) {
+            return {
+              ...opt,
+              votes: opt.votes.filter((u) => u !== currentUserIdStr),
+            };
+          }
+          return opt;
+        });
+
+        return {
+          ...msg,
+          poll: {
+            ...msg.poll,
+            options: updatedOptions,
+          },
+        };
+      });
+      broadcastEvent({ type: 'UPDATE_MESSAGES', messages: next });
+      return next;
+    });
+    if (soundEnabled) playSoundEffect('pop');
   };
 
   const toggleImportantMessage = (messageId: string) => {
@@ -710,11 +914,48 @@ export const ConnectProvider: React.FC<{ children: React.ReactNode }> = ({ child
     if (soundEnabled) playSoundEffect('settle');
   };
 
+  const setChatBackground = useCallback((target: string, settings: BackgroundSettings | null) => {
+    setCustomBackgrounds((prev) => {
+      const next = { ...prev };
+      if (settings) {
+        next[target] = settings;
+      } else {
+        delete next[target];
+      }
+      if (channelRef.current) {
+        try {
+          channelRef.current.postMessage({
+            type: 'UPDATE_BACKGROUNDS',
+            backgrounds: next,
+            senderTabId: tabId,
+          });
+        } catch {
+          // ignore
+        }
+      }
+      return next;
+    });
+  }, [tabId]);
+
+  const getChatBackground = useCallback((channelId?: string): BackgroundSettings | null => {
+    if (channelId && customBackgrounds[channelId]) {
+      return customBackgrounds[channelId];
+    }
+    return customBackgrounds['global'] || null;
+  }, [customBackgrounds]);
+
   const value = {
     currentUser,
     partnerUser,
     setCurrentUserId,
     updateUserStatus,
+    updateUserProfile,
+    stickers,
+    enabledStickerIds,
+    toggleStickerToShow,
+    setAllStickersToShow,
+    addCustomSticker,
+    removeCustomSticker,
     channels,
     activeChannelId,
     setActiveChannelId,
@@ -724,6 +965,7 @@ export const ConnectProvider: React.FC<{ children: React.ReactNode }> = ({ child
     togglePinChannel,
     deleteChannel,
     sendMessage,
+    votePoll,
     toggleImportantMessage,
     togglePinMessageInChat,
     deleteMessage,
@@ -746,6 +988,9 @@ export const ConnectProvider: React.FC<{ children: React.ReactNode }> = ({ child
     isMobileDrawerOpen,
     setIsMobileDrawerOpen,
     resetToDefaults,
+    customBackgrounds,
+    getChatBackground,
+    setChatBackground,
   };
 
   return <ConnectContext.Provider value={value}>{children}</ConnectContext.Provider>;
