@@ -16,6 +16,7 @@ import {
   Plus,
   Sparkles,
 } from 'lucide-react';
+import { useConnect } from '../context/ConnectContext';
 
 interface EmojiStickerPickerProps {
   isOpen: boolean;
@@ -147,81 +148,6 @@ const EMOJI_CATEGORIES = [
   },
 ];
 
-const BUILT_IN_STICKERS = [
-  {
-    id: 'love_duo',
-    name: 'Love You!',
-    url: 'https://images.unsplash.com/photo-1518199266791-5375a83190b7?w=300&auto=format&fit=crop&q=80',
-    emojiBadge: '💖',
-  },
-  {
-    id: 'coffee_break',
-    name: 'Coffee Time',
-    url: 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=300&auto=format&fit=crop&q=80',
-    emojiBadge: '☕',
-  },
-  {
-    id: 'ship_rocket',
-    name: "Let's Ship It!",
-    url: 'https://images.unsplash.com/photo-1541185933-ef5d8ed016c2?w=300&auto=format&fit=crop&q=80',
-    emojiBadge: '🚀',
-  },
-  {
-    id: 'celebrate_party',
-    name: 'Party Time!',
-    url: 'https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=300&auto=format&fit=crop&q=80',
-    emojiBadge: '🎉',
-  },
-  {
-    id: 'pizza_treat',
-    name: 'Pizza Split',
-    url: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=300&auto=format&fit=crop&q=80',
-    emojiBadge: '🍕',
-  },
-  {
-    id: 'coding_grind',
-    name: 'Coding Hard',
-    url: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=300&auto=format&fit=crop&q=80',
-    emojiBadge: '💻',
-  },
-  {
-    id: 'handshake_deal',
-    name: 'Agreed!',
-    url: 'https://images.unsplash.com/photo-1521791136064-7986c2920216?w=300&auto=format&fit=crop&q=80',
-    emojiBadge: '🤝',
-  },
-  {
-    id: 'money_settled',
-    name: 'Paid Up!',
-    url: 'https://images.unsplash.com/photo-1559526324-4b87b5e36e44?w=300&auto=format&fit=crop&q=80',
-    emojiBadge: '💸',
-  },
-  {
-    id: 'on_my_way',
-    name: 'On My Way!',
-    url: 'https://images.unsplash.com/photo-1502877338535-766e1452684a?w=300&auto=format&fit=crop&q=80',
-    emojiBadge: '🏃',
-  },
-  {
-    id: 'awesome_applause',
-    name: 'Awesome Work!',
-    url: 'https://images.unsplash.com/photo-1516280440614-37939bbacd81?w=300&auto=format&fit=crop&q=80',
-    emojiBadge: '👏',
-  },
-  {
-    id: 'cute_kitty',
-    name: 'Kitty Hug',
-    url: 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=300&auto=format&fit=crop&q=80',
-    emojiBadge: '🐱',
-  },
-  {
-    id: 'happy_pup',
-    name: 'Happy Pup',
-    url: 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=300&auto=format&fit=crop&q=80',
-    emojiBadge: '🐶',
-  },
-];
-
 export const EmojiStickerPicker: React.FC<EmojiStickerPickerProps> = ({
   isOpen,
   onClose,
@@ -229,6 +155,7 @@ export const EmojiStickerPicker: React.FC<EmojiStickerPickerProps> = ({
   onSelectSticker,
   onUploadCustomSticker,
 }) => {
+  const { stickers, enabledStickerIds } = useConnect();
   const [activeTab, setActiveTab] = useState<'emoji' | 'sticker'>('emoji');
   const [activeCategory, setActiveCategory] = useState<string>('smileys');
   const [searchQuery, setSearchQuery] = useState('');
@@ -237,6 +164,13 @@ export const EmojiStickerPicker: React.FC<EmojiStickerPickerProps> = ({
   ]);
   const pickerRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const stickersToShow = useMemo(() => {
+    const list = (stickers || []).filter((s) => (enabledStickerIds || []).includes(s.id));
+    if (!searchQuery.trim()) return list;
+    const q = searchQuery.toLowerCase();
+    return list.filter((s) => s.name.toLowerCase().includes(q));
+  }, [stickers, enabledStickerIds, searchQuery]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -427,34 +361,50 @@ export const EmojiStickerPicker: React.FC<EmojiStickerPickerProps> = ({
                   />
                 </div>
 
-                <div className="grid grid-cols-3 gap-2.5">
-                  {BUILT_IN_STICKERS.map((stk) => (
-                    <button
-                      key={stk.id}
-                      type="button"
-                      onClick={() => {
-                        onSelectSticker({ name: stk.name, url: stk.url });
-                        onClose();
-                      }}
-                      className="group p-2 rounded-2xl bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700/60 hover:border-emerald-500 hover:shadow-md transition-all flex flex-col items-center text-center cursor-pointer"
-                    >
-                      <div className="w-16 h-16 rounded-xl overflow-hidden relative mb-1.5 bg-zinc-200 dark:bg-zinc-700 shadow-xs group-hover:scale-105 transition-transform">
-                        <img
-                          src={stk.url}
-                          alt={stk.name}
-                          className="w-full h-full object-cover"
-                          loading="lazy"
-                        />
-                        <div className="absolute top-1 right-1 text-sm bg-white/80 dark:bg-black/60 rounded-full w-5 h-5 flex items-center justify-center">
-                          {stk.emojiBadge}
+                {stickersToShow.length === 0 ? (
+                  <div className="py-10 flex flex-col items-center justify-center text-center px-4">
+                    <div className="w-12 h-12 rounded-2xl bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-2xl mb-2 shadow-inner">
+                      🎨
+                    </div>
+                    <p className="text-xs font-semibold text-zinc-700 dark:text-zinc-200">
+                      No stickers selected to show
+                    </p>
+                    <p className="text-[11px] text-zinc-400 mt-1 max-w-[220px]">
+                      Enable your favorite stickers in Settings (⚙️) near the CONNECT heading, or upload your own!
+                    </p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-3 gap-2.5">
+                    {stickersToShow.map((stk) => (
+                      <button
+                        key={stk.id}
+                        type="button"
+                        onClick={() => {
+                          onSelectSticker({ name: stk.name, url: stk.url });
+                          onClose();
+                        }}
+                        className="group p-2 rounded-2xl bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700/60 hover:border-emerald-500 hover:shadow-md transition-all flex flex-col items-center text-center cursor-pointer"
+                      >
+                        <div className="w-16 h-16 rounded-xl overflow-hidden relative mb-1.5 bg-zinc-200 dark:bg-zinc-700 shadow-xs group-hover:scale-105 transition-transform">
+                          <img
+                            src={stk.url}
+                            alt={stk.name}
+                            className="w-full h-full object-cover"
+                            loading="lazy"
+                          />
+                          {stk.emojiBadge && (
+                            <div className="absolute top-1 right-1 text-sm bg-white/80 dark:bg-black/60 rounded-full w-5 h-5 flex items-center justify-center">
+                              {stk.emojiBadge}
+                            </div>
+                          )}
                         </div>
-                      </div>
-                      <span className="text-[10px] font-semibold text-zinc-700 dark:text-zinc-200 truncate w-full">
-                        {stk.name}
-                      </span>
-                    </button>
-                  ))}
-                </div>
+                        <span className="text-[10px] font-semibold text-zinc-700 dark:text-zinc-200 truncate w-full">
+                          {stk.name}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
           </div>

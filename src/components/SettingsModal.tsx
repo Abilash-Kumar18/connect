@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import { useConnect } from '../context/ConnectContext';
 import { StickerItem } from '../data/stickersData';
+import { User } from '../types';
 
 interface SettingsModalProps {
   isOpen: boolean;

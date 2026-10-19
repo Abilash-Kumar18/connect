@@ -464,6 +464,12 @@ export const Sidebar: React.FC<SidebarProps> = ({ onOpenNewChannel, onOpenAuth }
           </div>
         )}
       </AnimatePresence>
+
+      {/* Settings Modal (User Details & Profile Stickers) */}
+      <SettingsModal
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
+      />
     </>
   );
 };
