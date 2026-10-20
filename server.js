@@ -1,7 +1,13 @@
 import express from 'express';
+import http from 'http';
+import { Server } from 'socket.io';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
+import cors from 'cors';
+import helmet from 'helmet';
+import morgan from 'morgan';
+import compression from 'compression';
 
 dotenv.config();
 
@@ -9,24 +15,37 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
+const server = http.createServer(app);
 const port = parseInt(process.env.PORT || '3000', 10);
 
-app.use(express.json());
+const io = new Server(server, {
+  cors: {
+    origin: process.env.NODE_ENV === 'production' ? false : ['http://localhost:3000'],
+    methods: ['GET', 'POST'],
+  },
+});
 
-// Serve static files from Vite build output
+app.use(helmet());
+app.use(cors());
+app.use(compression());
+app.use(morgan('dev'));
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true }));
+
+app.get('/healthz', (_req, res) => res.json({ status: 'ok', timestamp: Date.now() }));
+app.get('/api/health', (_req, res) => res.json({ status: 'healthy', service: 'connect-api' }));
+
 const distPath = path.resolve(__dirname, 'dist');
 app.use(express.static(distPath));
+app.get('*', (_req, res) => res.sendFile(path.resolve(distPath, 'index.html')));
 
-// Health check route for cloud deployment probes
-app.get('/healthz', (_req, res) => {
-  res.status(200).send('OK');
+io.on('connection', (socket) => {
+  console.log('User connected:', socket.id);
+  socket.on('disconnect', () => console.log('User disconnected:', socket.id));
 });
 
-// SPA routing fallback: send index.html for any direct routes (/expenses, /channels/..., /profile)
-app.get('*', (_req, res) => {
-  res.sendFile(path.resolve(distPath, 'index.html'));
+server.listen(port, '0.0.0.0', () => {
+  console.log(`CONNECT server running on port ${port}`);
 });
 
-app.listen(port, '0.0.0.0', () => {
-  console.log(`CONNECT server running on port ${port} (http://0.0.0.0:${port})`);
-});
+export { app, io, server };
