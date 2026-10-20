@@ -71,7 +71,7 @@ interface ConnectContextType {
   soundEnabled: boolean;
   toggleSound: () => void;
   isAuthenticated: boolean;
-  login: (asUser?: 'alex' | 'jordan') => void;
+  login: (asUser?: 'alex' | 'jordan' | string, customProfile?: { name?: string; role?: string }) => void;
   logout: () => void;
   isMobileDrawerOpen: boolean;
   setIsMobileDrawerOpen: (open: boolean) => void;
@@ -893,7 +893,23 @@ export const ConnectProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const toggleDarkMode = () => setDarkMode((prev) => !prev);
   const toggleSound = () => setSoundEnabled((prev) => !prev);
 
-  const login = (asUser: 'alex' | 'jordan' = 'alex') => {
+  const login = (asUser: string = 'alex', customProfile?: { name?: string; role?: string }) => {
+    if (customProfile?.name) {
+      setUsers((prev) => ({
+        ...prev,
+        [asUser]: {
+          id: asUser,
+          name: customProfile.name || (asUser === 'jordan' ? 'Jordan Lee' : 'Alex Morgan'),
+          handle: `@${(customProfile.name || asUser).toLowerCase().replace(/\s+/g, '')}`,
+          avatar: asUser === 'jordan'
+            ? 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80'
+            : 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80',
+          statusText: '',
+          statusState: 'online',
+          role: customProfile.role || 'Duo Partner',
+        },
+      }));
+    }
     setCurrentUserIdState(asUser);
     setIsAuthenticated(true);
     if (soundEnabled) playSoundEffect('settle');
