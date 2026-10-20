@@ -635,50 +635,50 @@ export const ChatPane: React.FC<ChatPaneProps> = ({
                 )}
 
                 {/* Message Bubble Container with Hover Actions */}
-                <div className="relative max-w-[90%] sm:max-w-lg group/bubble">
+                <div className="relative max-w-[85%] sm:max-w-md group/bubble">
                   {/* EXPENSE MESSAGE CARD */}
                   {msg.type === 'expense' && msg.expense ? (
-                    <div className="p-5 sm:p-6 rounded-3xl bg-white text-zinc-950 border border-zinc-300 shadow-xl shadow-black/20 transition-all select-text min-w-[300px] sm:min-w-[360px]">
+                    <div className="p-3.5 sm:p-4 rounded-2xl bg-white text-zinc-950 border border-zinc-200/90 shadow-md shadow-black/10 transition-all select-text min-w-[250px] sm:min-w-[280px]">
                       {/* Header: Category & Settled/Pending Badge */}
-                      <div className="flex items-center justify-between gap-3 pb-3.5 border-b border-zinc-200">
-                        <div className="flex items-center gap-2.5">
-                          <div className="w-8 h-8 rounded-xl bg-zinc-100 border border-zinc-200/90 flex items-center justify-center text-black shrink-0">
-                            <Receipt className="w-4.5 h-4.5 text-black stroke-[2.2]" />
+                      <div className="flex items-center justify-between gap-2 pb-2 border-b border-zinc-200/80">
+                        <div className="flex items-center gap-1.5">
+                          <div className="w-5.5 h-5.5 rounded-md bg-zinc-100 border border-zinc-200/80 flex items-center justify-center text-black shrink-0">
+                            <Receipt className="w-3.5 h-3.5 text-black stroke-[2.2]" />
                           </div>
-                          <span className="text-sm sm:text-base font-extrabold uppercase tracking-wider text-black">
+                          <span className="text-[11px] font-bold uppercase tracking-wider text-black">
                             {msg.expense.category}
                           </span>
                         </div>
                         {msg.expense.isSettled ? (
-                          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-100 text-emerald-950 border border-emerald-300 text-xs sm:text-sm font-bold tracking-wide">
-                            <Check className="w-3.5 h-3.5 text-emerald-800 stroke-[2.5]" />
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-950 border border-emerald-300/80 text-[10px] font-bold tracking-wide">
+                            <Check className="w-2.5 h-2.5 text-emerald-800 stroke-[2.5]" />
                             <span>Settled</span>
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-100 text-amber-950 border border-amber-300 text-xs sm:text-sm font-bold tracking-wide">
-                            <Clock className="w-3.5 h-3.5 text-amber-800 stroke-[2.5]" />
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-50 text-amber-950 border border-amber-300/80 text-[10px] font-bold tracking-wide">
+                            <Clock className="w-2.5 h-2.5 text-amber-800 stroke-[2.5]" />
                             <span>Pending</span>
                           </span>
                         )}
                       </div>
 
                       {/* Body: Title, Amount, Split & Payer Info */}
-                      <div className="my-4">
-                        <div className="text-base sm:text-xl font-bold text-black leading-snug">
+                      <div className="my-2.5">
+                        <div className="text-xs sm:text-sm font-bold text-black leading-snug">
                           {msg.expense.title}
                         </div>
-                        <div className="text-3xl sm:text-4xl font-black font-mono tabular-nums text-black mt-2 tracking-tight flex items-baseline gap-1">
+                        <div className="text-xl sm:text-2xl font-black font-mono tabular-nums text-black mt-1 tracking-tight flex items-baseline gap-1">
                           <span>
                             {msg.expense.currency === '$' ? '₹' : (msg.expense.currency || '₹')}
                             {msg.expense.amount.toFixed(2)}
                           </span>
                         </div>
-                        <div className="text-sm sm:text-base font-medium text-zinc-800 mt-3 flex items-center gap-2 flex-wrap">
-                          <span className="font-extrabold text-black">
+                        <div className="text-[11px] sm:text-xs font-medium text-zinc-800 mt-1.5 flex items-center gap-1.5 flex-wrap">
+                          <span className="font-bold text-black">
                             Paid by {msg.expense.paidBy === 'alex' ? 'Alex' : 'Jordan'}
                           </span>
                           <span className="text-zinc-400">·</span>
-                          <span className="text-zinc-700">
+                          <span className="text-zinc-600">
                             {msg.expense.splitType === 'equally'
                               ? `Split equally (${msg.expense.currency === '$' ? '₹' : (msg.expense.currency || '₹')}${(msg.expense.amount / 2).toFixed(2)} each)`
                               : 'Direct non-split'}
@@ -687,17 +687,17 @@ export const ChatPane: React.FC<ChatPaneProps> = ({
                       </div>
 
                       {/* Footer: Timestamp & Action Button */}
-                      <div className="pt-3.5 border-t border-zinc-200 flex items-center justify-between gap-3">
-                        <span className="text-xs sm:text-sm font-semibold text-zinc-600">
+                      <div className="pt-2.5 border-t border-zinc-200/80 flex items-center justify-between gap-2">
+                        <span className="text-[10px] sm:text-[11px] font-medium text-zinc-500">
                           {formatTimestamp(msg.timestamp)}
                         </span>
                         <button
                           type="button"
                           onClick={() => markExpenseSettled(msg.id)}
-                          className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all shadow-sm active:scale-95 cursor-pointer ${
+                          className={`px-3 py-1 rounded-lg text-xs font-bold transition-all shadow-xs active:scale-95 cursor-pointer ${
                             msg.expense.isSettled
                               ? 'bg-zinc-100 hover:bg-zinc-200 text-black border border-zinc-300 hover:border-zinc-400'
-                              : 'bg-black hover:bg-zinc-800 text-white hover:shadow-md'
+                              : 'bg-black hover:bg-zinc-800 text-white hover:shadow-xs'
                           }`}
                         >
                           {msg.expense.isSettled ? 'Mark Unsettled' : 'Mark Settled'}
