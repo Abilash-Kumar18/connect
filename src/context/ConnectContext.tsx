@@ -1,12 +1,32 @@
 import React, { createContext, useContext, useState, useEffect, useMemo, useCallback, useRef } from 'react';
-import { User, Channel, Message, ExpenseSummary, ChannelCategory, ExpenseData, MessageType, BackgroundSettings } from '../types';
+import {
+  User,
+  Channel,
+  Message,
+  ExpenseSummary,
+  ChannelCategory,
+  ExpenseData,
+  MessageType,
+  BackgroundSettings,
+  AttachmentData,
+  PollData,
+  ContactData,
+} from '../types';
 import { INITIAL_USERS, INITIAL_CHANNELS, INITIAL_MESSAGES } from '../data/seedData';
+import { StickerItem, INITIAL_STICKERS } from '../data/stickersData';
 
 interface ConnectContextType {
   currentUser: User;
   partnerUser: User;
   setCurrentUserId: (id: string) => void;
   updateUserStatus: (statusText: string, state: User['statusState']) => void;
+  updateUserProfile: (data: Partial<User>) => void;
+  stickers: StickerItem[];
+  enabledStickerIds: string[];
+  toggleStickerToShow: (id: string) => void;
+  setAllStickersToShow: (enabled: boolean) => void;
+  addCustomSticker: (sticker: { name: string; url: string; emojiBadge?: string }) => void;
+  removeCustomSticker: (id: string) => void;
   channels: Channel[];
   activeChannelId: string;
   setActiveChannelId: (id: string) => void;
@@ -27,8 +47,13 @@ interface ConnectContextType {
     isImportant?: boolean;
     expense?: ExpenseData;
     meeting?: any;
+    attachment?: AttachmentData;
+    poll?: PollData;
+    contact?: ContactData;
+    stickerUrl?: string;
     overrideSenderId?: string;
   }) => void;
+  votePoll: (messageId: string, optionId: string) => void;
   toggleImportantMessage: (messageId: string) => void;
   togglePinMessageInChat: (messageId: string) => void;
   deleteMessage: (messageId: string) => void;
@@ -117,6 +142,8 @@ const STORAGE_KEYS = {
   SOUND: 'connect_sound_v2',
   AUTH: 'connect_auth_state_v2',
   CHAT_BG: 'connect_chat_bg_v2',
+  STICKERS: 'connect_stickers_v2',
+  ENABLED_STICKERS: 'connect_enabled_stickers_v2',
 };
 
 const deduplicateMessages = (msgList: Message[]): Message[] => {
@@ -246,6 +273,77 @@ export const ConnectProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [searchQuery, setSearchQuery] = useState('');
   const [channelFilter, setChannelFilter] = useState<ChannelCategory | 'all' | 'pinned'>('all');
   const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
+
+  // Sticker configuration state (Profile & Stickers to show)
+  const [stickers, setStickers] = useState<StickerItem[]>(() => {
+    const saved = localStorage.getItem(STORAGE_KEYS.STICKERS);
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch {}
+    }
+    return INITIAL_STICKERS;
+  });
+
+  const [enabledStickerIds, setEnabledStickerIds] = useState<string[]>(() => {
+    const saved = localStorage.getItem(STORAGE_KEYS.ENABLED_STICKERS);
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch {}
+    }
+    return INITIAL_STICKERS.map((s) => s.id);
+  });
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEYS.STICKERS, JSON.stringify(stickers));
+  }, [stickers]);
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEYS.ENABLED_STICKERS, JSON.stringify(enabledStickerIds));
+  }, [enabledStickerIds]);
+
+  const toggleStickerToShow = (id: string) => {
+    setEnabledStickerIds((prev) =>
+      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
+    );
+  };
+
+  const setAllStickersToShow = (enabled: boolean) => {
+    setEnabledStickerIds(enabled ? stickers.map((s) => s.id) : []);
+  };
+
+  const addCustomSticker = (newStk: { name: string; url: string; emojiBadge?: string }) => {
+    const item: StickerItem = {
+      id: `custom_stk_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+      name: newStk.name,
+      url: newStk.url,
+      emojiBadge: newStk.emojiBadge || '✨',
+      category: 'custom',
+    };
+    setStickers((prev) => [item, ...prev]);
+    setEnabledStickerIds((prev) => [item.id, ...prev]);
+  };
+
+  const removeCustomSticker = (id: string) => {
+    setStickers((prev) => prev.filter((s) => s.id !== id));
+    setEnabledStickerIds((prev) => prev.filter((i) => i !== id));
+  };
+
+  const updateUserProfile = (updatedFields: Partial<User>) => {
+    setUsers((prev) => {
+      const next = {
+        ...prev,
+        [currentUserId]: {
+          ...prev[currentUserId],
+          ...updatedFields,
+        },
+      };
+      localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(next));
+      broadcastEvent({ type: 'UPDATE_USERS', users: next });
+      return next;
+    });
+  };
 
   // Sync dark mode class with DOM
   useEffect(() => {
@@ -496,6 +594,10 @@ export const ConnectProvider: React.FC<{ children: React.ReactNode }> = ({ child
     isImportant = false,
     expense,
     meeting,
+    attachment,
+    poll,
+    contact,
+    stickerUrl,
     overrideSenderId,
   }: {
     content: string;
@@ -503,6 +605,10 @@ export const ConnectProvider: React.FC<{ children: React.ReactNode }> = ({ child
     isImportant?: boolean;
     expense?: ExpenseData;
     meeting?: any;
+    attachment?: AttachmentData;
+    poll?: PollData;
+    contact?: ContactData;
+    stickerUrl?: string;
     overrideSenderId?: string;
   }) => {
     const senderId = overrideSenderId || currentUserId;
@@ -518,6 +624,10 @@ export const ConnectProvider: React.FC<{ children: React.ReactNode }> = ({ child
       status: 'delivered',
       expense,
       meeting,
+      attachment,
+      poll,
+      contact,
+      stickerUrl,
     };
 
     // Update messages
@@ -538,6 +648,18 @@ export const ConnectProvider: React.FC<{ children: React.ReactNode }> = ({ child
             snippet = `💸 ${expense.title || 'Expense'}: ${expense.currency}${expense.amount.toFixed(2)}`;
           } else if (type === 'meeting' && meeting) {
             snippet = `📅 ${meeting.title || 'Meeting'}: ${meeting.date || ''}`;
+          } else if (type === 'media') {
+            snippet = `📷 Photo / Video`;
+          } else if (type === 'document') {
+            snippet = `📄 ${attachment?.name || 'Document'}`;
+          } else if (type === 'audio') {
+            snippet = `🎤 Voice Note`;
+          } else if (type === 'poll') {
+            snippet = `📊 Poll: ${poll?.question || ''}`;
+          } else if (type === 'contact') {
+            snippet = `👤 Contact: ${contact?.name || ''}`;
+          } else if (type === 'sticker') {
+            snippet = `✨ Sticker`;
           }
           return {
             ...c,
@@ -558,6 +680,45 @@ export const ConnectProvider: React.FC<{ children: React.ReactNode }> = ({ child
         playSoundEffect('receive');
       }
     }
+  };
+
+  const votePoll = (messageId: string, optionId: string) => {
+    setMessages((prev) => {
+      const next = prev.map((msg) => {
+        if (msg.id !== messageId || !msg.poll) return msg;
+        const currentUserIdStr = currentUserId;
+        const allowsMultiple = msg.poll.allowsMultipleAnswers;
+
+        const updatedOptions = msg.poll.options.map((opt) => {
+          const hasVoted = opt.votes.includes(currentUserIdStr);
+          if (opt.id === optionId) {
+            return {
+              ...opt,
+              votes: hasVoted
+                ? opt.votes.filter((u) => u !== currentUserIdStr)
+                : [...opt.votes, currentUserIdStr],
+            };
+          } else if (!allowsMultiple) {
+            return {
+              ...opt,
+              votes: opt.votes.filter((u) => u !== currentUserIdStr),
+            };
+          }
+          return opt;
+        });
+
+        return {
+          ...msg,
+          poll: {
+            ...msg.poll,
+            options: updatedOptions,
+          },
+        };
+      });
+      broadcastEvent({ type: 'UPDATE_MESSAGES', messages: next });
+      return next;
+    });
+    if (soundEnabled) playSoundEffect('pop');
   };
 
   const toggleImportantMessage = (messageId: string) => {
@@ -788,6 +949,13 @@ export const ConnectProvider: React.FC<{ children: React.ReactNode }> = ({ child
     partnerUser,
     setCurrentUserId,
     updateUserStatus,
+    updateUserProfile,
+    stickers,
+    enabledStickerIds,
+    toggleStickerToShow,
+    setAllStickersToShow,
+    addCustomSticker,
+    removeCustomSticker,
     channels,
     activeChannelId,
     setActiveChannelId,
@@ -797,6 +965,7 @@ export const ConnectProvider: React.FC<{ children: React.ReactNode }> = ({ child
     togglePinChannel,
     deleteChannel,
     sendMessage,
+    votePoll,
     toggleImportantMessage,
     togglePinMessageInChat,
     deleteMessage,

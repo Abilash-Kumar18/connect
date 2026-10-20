@@ -18,11 +18,13 @@ import {
   RotateCcw,
   LogOut,
   SlidersHorizontal,
+  Settings,
 } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useConnect } from '../context/ConnectContext';
 import { ChannelIcon } from './ChannelIcon';
 import { ChannelCategory, Channel } from '../types';
+import { SettingsModal } from './SettingsModal';
 
 interface SidebarProps {
   onOpenNewChannel: () => void;
@@ -53,6 +55,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ onOpenNewChannel, onOpenAuth }
   } = useConnect();
 
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -118,9 +121,22 @@ export const Sidebar: React.FC<SidebarProps> = ({ onOpenNewChannel, onOpenAuth }
               C
             </div>
             <div>
-              <span className="font-bold tracking-tight font-display text-base text-[#2D3325] dark:text-[#F7F2EB] group-hover:text-[#8B9A6E] transition-colors">
-                CONNECT
-              </span>
+              <div className="flex items-center gap-1.5">
+                <span className="font-bold tracking-tight font-display text-base text-[#2D3325] dark:text-[#F7F2EB] group-hover:text-[#8B9A6E] transition-colors">
+                  CONNECT
+                </span>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsSettingsOpen(true);
+                  }}
+                  title="Settings (User Details & Profile Stickers)"
+                  className="p-1 rounded-lg text-[#788566] dark:text-[#B7C2A5] hover:text-[#2D3325] dark:hover:text-white hover:bg-[#EAE2D6] dark:hover:bg-[#2A3324] transition-all hover:rotate-45"
+                >
+                  <Settings className="w-3.5 h-3.5" />
+                </button>
+              </div>
               <span className="text-[10px] text-[#788566] dark:text-[#B7C2A5] block font-normal -mt-0.5">
                 Duo Context Space
               </span>
@@ -128,6 +144,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ onOpenNewChannel, onOpenAuth }
           </div>
 
           <div className="flex items-center gap-1">
+            <button
+              onClick={() => setIsSettingsOpen(true)}
+              title="Settings & Profile Stickers"
+              className="p-1.5 rounded-lg text-[#788566] dark:text-[#B7C2A5] hover:text-[#2D3325] dark:hover:text-white hover:bg-[#EAE2D6] dark:hover:bg-[#2A3324] transition-colors"
+            >
+              <Settings className="w-4 h-4" />
+            </button>
             <button
               onClick={onOpenNewChannel}
               title="Create new topic channel"
@@ -441,6 +464,12 @@ export const Sidebar: React.FC<SidebarProps> = ({ onOpenNewChannel, onOpenAuth }
           </div>
         )}
       </AnimatePresence>
+
+      {/* Settings Modal (User Details & Profile Stickers) */}
+      <SettingsModal
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
+      />
     </>
   );
 };

@@ -12,27 +12,30 @@ import {
   Filter,
   Check,
   CheckCheck,
-  MoreVertical,
   Trash2,
   Sparkles,
   ArrowRightLeft,
-  ChevronLeft,
-  PlusCircle,
   Clock,
   MapPin,
-  TrendingUp,
-  CreditCard,
   FileText,
-  ThumbsUp,
-  Heart,
-  Laugh,
-  Flame,
-  Image as ImageIcon,
+  Paperclip,
+  Mic,
+  Download,
+  Play,
+  Pause,
+  User,
+  BarChart2,
+  X,
 } from 'lucide-react';
 import { useConnect } from '../context/ConnectContext';
 import { ChannelIcon } from './ChannelIcon';
 import { Message, MessageType } from '../types';
 import { WallpaperModal } from './WallpaperModal';
+import { AttachmentMenu } from './AttachmentMenu';
+import { EmojiStickerPicker } from './EmojiStickerPicker';
+import { ContactModal } from './ContactModal';
+import { PollModal } from './PollModal';
+import { CameraModal } from './CameraModal';
 
 interface ChatPaneProps {
   onOpenExpenseModal: () => void;
@@ -40,8 +43,6 @@ interface ChatPaneProps {
   onOpenSummaryModal: () => void;
   onOpenNewChannelModal: () => void;
 }
-
-const COMMON_EMOJIS = ['😀', '❤️', '👍', '😂', '💸', '🔥', '🚀', '☕', '📚', '📅', '🎉', '💯'];
 
 export const ChatPane: React.FC<ChatPaneProps> = ({
   onOpenExpenseModal,
@@ -56,6 +57,7 @@ export const ChatPane: React.FC<ChatPaneProps> = ({
     activeChannel,
     activeMessages,
     sendMessage,
+    votePoll,
     toggleImportantMessage,
     togglePinMessageInChat,
     deleteMessage,
@@ -70,17 +72,38 @@ export const ChatPane: React.FC<ChatPaneProps> = ({
 
   const [inputText, setInputText] = useState('');
   const [isDraftImportant, setIsDraftImportant] = useState(false);
-  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [topicFilter, setTopicFilter] = useState<'all' | 'important' | 'expense' | 'meeting' | 'pinned'>('all');
   const [topicSearch, setTopicSearch] = useState('');
   const [showTopicSearch, setShowTopicSearch] = useState(false);
   const [showPartnerSimulateMenu, setShowPartnerSimulateMenu] = useState(false);
   const [isWallpaperModalOpen, setIsWallpaperModalOpen] = useState(false);
 
-  const activeBg = activeChannel ? getChatBackground(activeChannel.id) : null;
+  // Attachment & Picker Popups
+  const [showAttachmentMenu, setShowAttachmentMenu] = useState(false);
+  const [showEmojiStickerPicker, setShowEmojiStickerPicker] = useState(false);
 
+  // Attachment Modals
+  const [showContactModal, setShowContactModal] = useState(false);
+  const [showPollModal, setShowPollModal] = useState(false);
+  const [showCameraModal, setShowCameraModal] = useState(false);
+
+  // Audio Playback
+  const [playingAudioId, setPlayingAudioId] = useState<string | null>(null);
+  const audioPlayerRef = useRef<HTMLAudioElement | null>(null);
+
+  // Hidden File Inputs
+  const docInputRef = useRef<HTMLInputElement>(null);
+  const mediaInputRef = useRef<HTMLInputElement>(null);
+  const audioInputRef = useRef<HTMLInputElement>(null);
+  const stickerUploadRef = useRef<HTMLInputElement>(null);
+
+  // Voice Access (Web Speech API)
+  const [isListening, setIsListening] = useState(false);
+  const recognitionRef = useRef<any>(null);
+
+  const activeBg = activeChannel ? getChatBackground(activeChannel.id) : null;
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   const isSendingRef = useRef(false);
 
   // Auto scroll to bottom
@@ -91,6 +114,60 @@ export const ChatPane: React.FC<ChatPaneProps> = ({
   useEffect(() => {
     scrollToBottom();
   }, [activeMessages.length, activeChannel?.id, topicFilter]);
+
+  // Initialize Speech Recognition for Voice Access
+  useEffect(() => {
+    const SpeechRecognition =
+      (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (SpeechRecognition) {
+      const recognition = new SpeechRecognition();
+      recognition.continuous = false;
+      recognition.interimResults = true;
+      recognition.lang = 'en-US';
+
+      recognition.onresult = (event: any) => {
+        let transcript = '';
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          transcript += event.results[i][0].transcript;
+        }
+        if (transcript) {
+          setInputText((prev) => {
+            const trimmed = prev.trim();
+            return trimmed ? `${trimmed} ${transcript}` : transcript;
+          });
+        }
+      };
+
+      recognition.onerror = () => {
+        setIsListening(false);
+      };
+
+      recognition.onend = () => {
+        setIsListening(false);
+      };
+
+      recognitionRef.current = recognition;
+    }
+  }, []);
+
+  const toggleVoiceAccess = () => {
+    if (isListening) {
+      recognitionRef.current?.stop();
+      setIsListening(false);
+    } else {
+      if (recognitionRef.current) {
+        try {
+          recognitionRef.current.start();
+          setIsListening(true);
+        } catch {
+          setIsListening(false);
+        }
+      } else {
+        const simulatedSpoken = 'Voice message noted.';
+        setInputText((prev) => (prev ? `${prev} ${simulatedSpoken}` : simulatedSpoken));
+      }
+    }
+  };
 
   if (!activeChannel) {
     return (
@@ -150,34 +227,134 @@ export const ChatPane: React.FC<ChatPaneProps> = ({
 
     setInputText('');
     setIsDraftImportant(false);
-    setShowEmojiPicker(false);
-    if (textareaRef.current) {
-      textareaRef.current.style.height = 'auto';
-    }
+    setShowEmojiStickerPicker(false);
+    setShowAttachmentMenu(false);
 
     setTimeout(() => {
       isSendingRef.current = false;
     }, 250);
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      if (e.nativeEvent.isComposing) return;
-      e.preventDefault();
-      handleSend();
+  const addEmojiToInput = (emoji: string) => {
+    setInputText((prev) => prev + emoji);
+    inputRef.current?.focus();
+  };
+
+  const togglePlayAudio = (id: string, url?: string) => {
+    if (playingAudioId === id) {
+      audioPlayerRef.current?.pause();
+      setPlayingAudioId(null);
+    } else if (url) {
+      if (audioPlayerRef.current) {
+        audioPlayerRef.current.pause();
+      }
+      const audio = new Audio(url);
+      audio.onended = () => setPlayingAudioId(null);
+      audio.play().catch(() => {});
+      audioPlayerRef.current = audio;
+      setPlayingAudioId(id);
     }
   };
 
-  const handleTextareaInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setInputText(e.target.value);
-    e.target.style.height = 'auto';
-    e.target.style.height = `${Math.min(e.target.scrollHeight, 120)}px`;
+  // Attachment file handlers
+  const handleDocumentUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      sendMessage({
+        content: file.name,
+        type: 'document',
+        attachment: {
+          name: file.name,
+          url: event.target?.result as string,
+          size: `${(file.size / 1024).toFixed(1)} KB`,
+          mimeType: file.type,
+        },
+      });
+    };
+    reader.readAsDataURL(file);
+    e.target.value = '';
   };
 
-  const addEmojiToInput = (emoji: string) => {
-    setInputText((prev) => prev + emoji);
-    setShowEmojiPicker(false);
-    textareaRef.current?.focus();
+  const handleMediaUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      sendMessage({
+        content: file.name,
+        type: 'media',
+        attachment: {
+          name: file.name,
+          url: event.target?.result as string,
+          size: `${(file.size / (1024 * 1024)).toFixed(2)} MB`,
+          mimeType: file.type,
+        },
+      });
+    };
+    reader.readAsDataURL(file);
+    e.target.value = '';
+  };
+
+  const handleAudioUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      sendMessage({
+        content: 'Voice Note',
+        type: 'audio',
+        attachment: {
+          name: file.name,
+          url: event.target?.result as string,
+          size: `${(file.size / 1024).toFixed(1)} KB`,
+          duration: '0:14',
+        },
+      });
+    };
+    reader.readAsDataURL(file);
+    e.target.value = '';
+  };
+
+  const handleCustomStickerUpload = (file: File) => {
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      sendMessage({
+        content: 'Custom Sticker',
+        type: 'sticker',
+        stickerUrl: event.target?.result as string,
+      });
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleCameraCapture = (dataUrl: string) => {
+    sendMessage({
+      content: 'Camera Photo',
+      type: 'media',
+      attachment: {
+        name: `Photo_${new Date().toISOString().slice(0, 10)}.jpg`,
+        url: dataUrl,
+        size: 'Camera snapshot',
+      },
+    });
+  };
+
+  const handleSendContact = (contact: any) => {
+    sendMessage({
+      content: `Contact: ${contact.name}`,
+      type: 'contact',
+      contact,
+    });
+  };
+
+  const handleSendPoll = (poll: any) => {
+    sendMessage({
+      content: `Poll: ${poll.question}`,
+      type: 'poll',
+      poll,
+    });
   };
 
   const formatTimestamp = (ts: number) => {
@@ -219,198 +396,199 @@ export const ChatPane: React.FC<ChatPaneProps> = ({
             <ChannelIcon name={activeChannel.icon} className="w-4 h-4" />
           </div>
 
-          {/* Topic Title & Context Info */}
           <div className="min-w-0">
-            <div className="flex items-center gap-2">
-              <h2 className="text-sm font-bold font-display text-[#2D3325] dark:text-white truncate">
+            <div className="flex items-center gap-1.5">
+              <h2 className="text-sm font-bold text-slate-800 dark:text-slate-100 truncate">
                 {activeChannel.name}
               </h2>
               {activeChannel.isPinned && (
-                <span title="Pinned Channel" className="text-[#8B9A6E]">
-                  <Pin className="w-3.5 h-3.5 fill-[#8B9A6E]" />
-                </span>
+                <Pin className="w-3 h-3 text-[#8B9A6E] fill-[#8B9A6E] shrink-0" />
               )}
             </div>
-            <div className="text-[11px] text-[#788566] dark:text-[#A7B395] truncate flex items-center gap-2">
-              <span>{currentUser.name.split(' ')[0]} & {partnerUser.name.split(' ')[0]}</span>
-              <span aria-hidden="true">·</span>
-              <span className="truncate">{activeChannel.description}</span>
-            </div>
+            <p className="text-[11px] text-slate-400 truncate">
+              {currentUser.name.split(' ')[0]} &amp; {partnerUser.name.split(' ')[0]}
+              {activeChannel.description ? ` · ${activeChannel.description}` : ''}
+            </p>
           </div>
         </div>
 
-        {/* Right Header Actions */}
+        {/* Right Header Action Items */}
         <div className="flex items-center gap-1.5 shrink-0">
-          {/* Search in topic toggle */}
+          {/* In-chat Topic Search Toggle */}
           <button
             onClick={() => setShowTopicSearch(!showTopicSearch)}
-            title="Search inside this channel"
             className={`p-2 rounded-xl transition-colors ${
               showTopicSearch || topicSearch
-                ? 'bg-[#8B9A6E]/20 text-[#586348] dark:text-[#C5CEB8]'
-                : 'text-[#788566] hover:text-[#2D3325] dark:hover:text-white hover:bg-[#EAE2D6] dark:hover:bg-[#252C21]'
+                ? 'text-[#8B9A6E] bg-[#EAE2D6] dark:bg-[#252C21]'
+                : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-[#EAE2D6] dark:hover:bg-[#252C21]'
             }`}
+            title="Search inside this channel"
           >
             <Search className="w-4 h-4" />
           </button>
 
-          {/* Expense balance indicator pill (if channel has expenses) */}
+          {/* Expense Balance pill button (if channel has expenses) */}
           {hasExpenses && (
             <button
               onClick={onOpenSummaryModal}
-              title="View itemized expense breakdown"
-              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-[#8B9A6E]/40 bg-[#EAE2D6]/80 dark:bg-[#252C21] text-[#4A5538] dark:text-[#EAE2D6] text-xs font-semibold hover:bg-[#EAE2D6] transition-colors"
+              className="px-2.5 py-1.5 rounded-xl border border-[#DFD6C7] dark:border-[#353E2F] bg-[#EEEEEE] dark:bg-[#252C21] hover:bg-[#EAE2D6] transition-colors text-xs font-semibold flex items-center gap-1.5 text-[#586348] dark:text-[#C5CEB8]"
+              title="Click to view shared expense summary"
             >
               <Receipt className="w-3.5 h-3.5 text-[#8B9A6E]" />
-              <span>
-                {Math.abs(channelSummary.netBalance) > 0.01
-                  ? `${channelSummary.netBalance > 0 ? 'Jordan owes' : 'You owe'} ${activeChannel.currency === '$' ? '₹' : (activeChannel.currency || '₹')}${Math.abs(channelSummary.netBalance).toFixed(2)}`
-                  : 'Settled'}
+              <span className="hidden sm:inline">
+                {channelSummary.netBalance === 0
+                  ? 'All Settled'
+                  : channelSummary.netBalance > 0
+                  ? `${partnerUser.name.split(' ')[0]} owes ₹${channelSummary.netBalance.toFixed(2)}`
+                  : `You owe ₹${Math.abs(channelSummary.netBalance).toFixed(2)}`}
               </span>
             </button>
           )}
 
-          {/* Pin channel button */}
+          {/* Pin Channel */}
           <button
             onClick={() => togglePinChannel(activeChannel.id)}
-            title={activeChannel.isPinned ? 'Unpin channel' : 'Pin channel to top'}
             className={`p-2 rounded-xl transition-colors ${
               activeChannel.isPinned
                 ? 'text-[#8B9A6E] bg-[#EAE2D6] dark:bg-[#252C21]'
-                : 'text-[#788566] hover:text-[#2D3325] dark:hover:text-white hover:bg-[#EAE2D6] dark:hover:bg-[#252C21]'
+                : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-[#EAE2D6] dark:hover:bg-[#252C21]'
             }`}
+            title={activeChannel.isPinned ? 'Unpin channel' : 'Pin channel to top'}
           >
             <Pin className={`w-4 h-4 ${activeChannel.isPinned ? 'fill-[#8B9A6E]' : ''}`} />
           </button>
 
-          {/* Wallpaper / Background Photo Button */}
+          {/* Wallpaper / Background Setting Button */}
           <button
             onClick={() => setIsWallpaperModalOpen(true)}
-            title={activeBg ? 'Custom background active · Click to change or remove' : 'Attach background photo / wallpaper'}
-            className={`p-2 rounded-xl transition-all relative ${
-              activeBg
-                ? 'text-zinc-950 dark:text-white bg-black/10 dark:bg-white/10 ring-1 ring-black/20 dark:ring-white/20'
-                : 'text-[#788566] hover:text-[#2D3325] dark:hover:text-white hover:bg-[#EAE2D6] dark:hover:bg-[#252C21]'
-            }`}
+            className="p-2 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-[#EAE2D6] dark:hover:bg-[#252C21] transition-colors relative"
+            title="Channel Wallpaper / Background Photo"
           >
-            <ImageIcon className="w-4 h-4" />
+            <svg
+              className="w-4 h-4"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
+              <circle cx="9" cy="9" r="2" />
+              <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
+            </svg>
             {activeBg && (
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-emerald-500 ring-2 ring-white dark:ring-zinc-900" />
+              <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-[#8B9A6E]" />
             )}
           </button>
 
-          {/* Switch Sender indicator pill */}
+          {/* Switch Active User */}
           <button
-            onClick={() => setCurrentUserId(currentUser.id === 'alex' ? 'jordan' : 'alex')}
-            title={`Currently chatting as ${currentUser.name}. Click to switch to ${partnerUser.name}.`}
-            className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl border border-[#DFD6C7] dark:border-[#353E2F] bg-white dark:bg-[#252C21] text-[#4A5538] dark:text-[#EAE2D6] text-xs font-medium hover:border-[#8B9A6E] transition-colors"
+            onClick={() => setCurrentUserId(partnerUser.id)}
+            className="px-2 py-1.5 rounded-xl border border-[#DFD6C7] dark:border-[#353E2F] bg-[#EEEEEE] dark:bg-[#252C21] text-[#586348] dark:text-[#C5CEB8] text-xs font-medium flex items-center gap-1 hover:bg-[#EAE2D6] transition-colors"
+            title={`Switch to act as ${partnerUser.name}`}
           >
-            <ArrowRightLeft className="w-3 h-3 text-[#8B9A6E]" />
-            <span className="hidden lg:inline text-[11px]">As:</span>
-            <span className="font-semibold text-[11px]">{currentUser.name.split(' ')[0]}</span>
+            <ArrowRightLeft className="w-3 h-3" />
+            <span className="hidden sm:inline">As: {currentUser.name.split(' ')[0]}</span>
           </button>
         </div>
       </header>
 
-      {/* 2. Sub-Header: Search bar or In-Topic Filter Pills */}
-      <div className="px-4 py-2 border-b border-[#EAE2D6] dark:border-[#353E2F] bg-[#F7F2EB]/80 dark:bg-[#1E231B]/80 backdrop-blur-xs flex items-center justify-between gap-2 overflow-x-auto text-[11px]">
-        {showTopicSearch ? (
-          <div className="relative w-full flex items-center gap-2">
-            <Search className="w-3.5 h-3.5 text-[#788566] absolute left-2.5" />
+      {/* Optional Search bar dropdown */}
+      <AnimatePresence>
+        {showTopicSearch && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            className="px-4 py-2 bg-[#F7F2EB] dark:bg-[#1E231B] border-b border-[#EAE2D6] dark:border-[#353E2F] flex items-center gap-2 z-10 shrink-0"
+          >
+            <Search className="w-4 h-4 text-[#8B9A6E]" />
             <input
               type="text"
+              autoFocus
               value={topicSearch}
               onChange={(e) => setTopicSearch(e.target.value)}
-              placeholder={`Filter messages in #${activeChannel.name}...`}
-              className="w-full pl-8 pr-7 py-1 rounded-lg border border-[#EAE2D6] dark:border-[#353E2F] bg-[#EEEEEE] dark:bg-[#252C21] text-xs text-[#2D3325] dark:text-[#F7F2EB] focus:outline-none focus:ring-1 focus:ring-[#8B9A6E]"
-              autoFocus
+              placeholder={`Search messages, expenses, or notes in #${activeChannel.name}...`}
+              className="flex-1 bg-transparent text-xs text-slate-800 dark:text-slate-100 placeholder-slate-400 outline-none"
             />
             {topicSearch && (
               <button
                 onClick={() => setTopicSearch('')}
-                className="absolute right-2 text-[#788566] hover:text-[#2D3325] text-xs"
+                className="text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
               >
-                ×
+                Clear
               </button>
             )}
-          </div>
-        ) : (
-          <div className="flex items-center gap-1.5">
-            <button
-              onClick={() => setTopicFilter('all')}
-              className={`px-2.5 py-1 rounded-lg font-medium transition-colors ${
-                topicFilter === 'all'
-                  ? 'bg-[#8B9A6E] text-white shadow-xs'
-                  : 'bg-[#EEEEEE] dark:bg-[#252C21] text-[#586348] dark:text-[#C5CEB8] hover:bg-[#EAE2D6]'
-              }`}
-            >
-              All Messages ({activeMessages.length})
-            </button>
-            <button
-              onClick={() => setTopicFilter('important')}
-              className={`px-2.5 py-1 rounded-lg font-medium transition-colors flex items-center gap-1 ${
-                topicFilter === 'important'
-                  ? 'bg-[#8B9A6E] text-white shadow-xs'
-                  : 'bg-[#EEEEEE] dark:bg-[#252C21] text-[#586348] dark:text-[#C5CEB8] hover:bg-[#EAE2D6]'
-              }`}
-            >
-              <Star className="w-3 h-3" />
-              <span>Important</span>
-            </button>
-            {hasExpenses && (
-              <button
-                onClick={() => setTopicFilter('expense')}
-                className={`px-2.5 py-1 rounded-lg font-medium transition-colors flex items-center gap-1 ${
-                  topicFilter === 'expense'
-                    ? 'bg-[#8B9A6E] text-white shadow-xs'
-                    : 'bg-[#EEEEEE] dark:bg-[#252C21] text-[#586348] dark:text-[#C5CEB8] hover:bg-[#EAE2D6]'
-                }`}
-              >
-                <Receipt className="w-3 h-3" />
-                <span>Expenses</span>
-              </button>
-            )}
-            <button
-              onClick={() => setTopicFilter('meeting')}
-              className={`px-2.5 py-1 rounded-lg font-medium transition-colors flex items-center gap-1 ${
-                topicFilter === 'meeting'
-                  ? 'bg-[#8B9A6E] text-white shadow-xs'
-                  : 'bg-[#EEEEEE] dark:bg-[#252C21] text-[#586348] dark:text-[#C5CEB8] hover:bg-[#EAE2D6]'
-              }`}
-            >
-              <Calendar className="w-3 h-3" />
-              <span>Meetings</span>
-            </button>
-            {pinnedInChatCount > 0 && (
-              <button
-                onClick={() => setTopicFilter('pinned')}
-                className={`px-2.5 py-1 rounded-lg font-medium transition-colors flex items-center gap-1 ${
-                  topicFilter === 'pinned'
-                    ? 'bg-[#8B9A6E] text-white shadow-xs'
-                    : 'bg-[#EEEEEE] dark:bg-[#252C21] text-[#586348] dark:text-[#C5CEB8] hover:bg-[#EAE2D6]'
-                }`}
-              >
-                <Pin className="w-3 h-3" />
-                <span>Pinned ({pinnedInChatCount})</span>
-              </button>
-            )}
-          </div>
+          </motion.div>
         )}
+      </AnimatePresence>
 
-        {/* Small screen balance trigger */}
-        {hasExpenses && (
+      {/* 2. In-Chat Filter Tabs */}
+      <div className="px-4 py-2 border-b border-[#EAE2D6]/80 dark:border-[#353E2F]/80 bg-[#F7F2EB]/80 dark:bg-[#1E231B]/80 flex items-center justify-between text-xs z-10 shrink-0">
+        <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none">
           <button
-            onClick={onOpenSummaryModal}
-            className="sm:hidden text-[#8B9A6E] dark:text-[#A3B386] font-semibold whitespace-nowrap text-[11px] underline"
+            onClick={() => setTopicFilter('all')}
+            className={`px-2.5 py-1 rounded-lg font-medium transition-colors ${
+              topicFilter === 'all'
+                ? 'bg-[#8B9A6E] text-white shadow-xs'
+                : 'bg-[#EEEEEE] dark:bg-[#252C21] text-[#586348] dark:text-[#C5CEB8] hover:bg-[#EAE2D6]'
+            }`}
           >
-            Balance
+            All Messages ({activeMessages.length})
           </button>
-        )}
+          <button
+            onClick={() => setTopicFilter('important')}
+            className={`px-2.5 py-1 rounded-lg font-medium transition-colors flex items-center gap-1 ${
+              topicFilter === 'important'
+                ? 'bg-[#8B9A6E] text-white shadow-xs'
+                : 'bg-[#EEEEEE] dark:bg-[#252C21] text-[#586348] dark:text-[#C5CEB8] hover:bg-[#EAE2D6]'
+            }`}
+          >
+            <Star className="w-3 h-3" />
+            <span>Important</span>
+          </button>
+          <button
+            onClick={() => setTopicFilter('expense')}
+            className={`px-2.5 py-1 rounded-lg font-medium transition-colors flex items-center gap-1 ${
+              topicFilter === 'expense'
+                ? 'bg-[#8B9A6E] text-white shadow-xs'
+                : 'bg-[#EEEEEE] dark:bg-[#252C21] text-[#586348] dark:text-[#C5CEB8] hover:bg-[#EAE2D6]'
+            }`}
+          >
+            <Receipt className="w-3 h-3" />
+            <span>Expenses</span>
+          </button>
+          <button
+            onClick={() => setTopicFilter('meeting')}
+            className={`px-2.5 py-1 rounded-lg font-medium transition-colors flex items-center gap-1 ${
+              topicFilter === 'meeting'
+                ? 'bg-[#8B9A6E] text-white shadow-xs'
+                : 'bg-[#EEEEEE] dark:bg-[#252C21] text-[#586348] dark:text-[#C5CEB8] hover:bg-[#EAE2D6]'
+            }`}
+          >
+            <Calendar className="w-3 h-3" />
+            <span>Meetings</span>
+          </button>
+          {pinnedInChatCount > 0 && (
+            <button
+              onClick={() => setTopicFilter('pinned')}
+              className={`px-2.5 py-1 rounded-lg font-medium transition-colors flex items-center gap-1 ${
+                topicFilter === 'pinned'
+                  ? 'bg-[#8B9A6E] text-white shadow-xs'
+                  : 'bg-[#EEEEEE] dark:bg-[#252C21] text-[#586348] dark:text-[#C5CEB8] hover:bg-[#EAE2D6]'
+              }`}
+            >
+              <Pin className="w-3 h-3" />
+              <span>Pinned ({pinnedInChatCount})</span>
+            </button>
+          )}
+        </div>
       </div>
 
-      {/* 3. Messages Feed */}
+      {/* 3. Messages Feed (Bottom-anchored without awkward gap) */}
       <div className="flex-1 overflow-y-auto px-4 pt-3 pb-2 space-y-3 relative z-10 flex flex-col">
-        {/* Spacer to push messages down snugly above the message box like WhatsApp/iMessage */}
+        {/* Spacer to push messages down snugly above the message box */}
         <div className="mt-auto" />
 
         {filteredMessages.length === 0 ? (
@@ -426,7 +604,7 @@ export const ChatPane: React.FC<ChatPaneProps> = ({
             <p className="text-xs text-slate-400 max-w-sm mx-auto mt-1">
               {topicFilter !== 'all'
                 ? 'Try clearing the filter tabs above.'
-                : 'Send your first message or post an expense/meeting note below.'}
+                : 'Type a message or use the attachment button below to post.'}
             </p>
           </div>
         ) : (
@@ -438,7 +616,7 @@ export const ChatPane: React.FC<ChatPaneProps> = ({
                 key={msg.id}
                 className={`flex flex-col group ${isMe ? 'items-end' : 'items-start'}`}
               >
-                {/* Important/Pin badges only (Sender name omitted per user request) */}
+                {/* Important/Pin badges */}
                 {(msg.isImportant || msg.isPinnedInChat) && (
                   <div className="flex items-center gap-1.5 text-[11px] text-slate-400 mb-1 px-1">
                     {msg.isImportant && (
@@ -534,8 +712,8 @@ export const ChatPane: React.FC<ChatPaneProps> = ({
                       }`}
                     >
                       <div className="flex items-center gap-1.5 text-xs font-semibold mb-2 opacity-90">
-                        <Calendar className="w-4 h-4" />
-                        <span>Meeting & Event Note</span>
+                        <Calendar className="w-4 h-4 text-[#FF4757]" />
+                        <span>Meeting &amp; Event</span>
                       </div>
                       <div className="text-sm font-bold">{msg.meeting.title}</div>
                       <div className="space-y-1 my-2 text-xs opacity-90">
@@ -560,6 +738,221 @@ export const ChatPane: React.FC<ChatPaneProps> = ({
                       </div>
                       <div className="text-[10px] opacity-60 text-right">
                         {formatTimestamp(msg.timestamp)}
+                      </div>
+                    </div>
+                  ) : msg.type === 'media' ? (
+                    /* MEDIA / PHOTO / VIDEO CARD */
+                    <div className="rounded-2xl overflow-hidden border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-xs">
+                      {msg.attachment?.url && (
+                        <img
+                          src={msg.attachment.url}
+                          alt={msg.attachment.name || 'Photo'}
+                          className="max-w-full max-h-72 object-cover rounded-t-2xl hover:opacity-95 transition-opacity cursor-pointer"
+                          onClick={() => window.open(msg.attachment?.url, '_blank')}
+                        />
+                      )}
+                      {msg.content && msg.content !== msg.attachment?.name && msg.content !== 'Camera Photo' && (
+                        <p className="px-3 pt-2 text-xs font-medium text-zinc-800 dark:text-zinc-200">
+                          {msg.content}
+                        </p>
+                      )}
+                      <div className="px-3 py-1.5 flex items-center justify-between text-[10px] opacity-60">
+                        <span>{msg.attachment?.size || 'Photo'}</span>
+                        <div className="flex items-center gap-1">
+                          <span>{formatTimestamp(msg.timestamp)}</span>
+                          {isMe && <CheckCheck className="w-3 h-3 text-emerald-500" />}
+                        </div>
+                      </div>
+                    </div>
+                  ) : msg.type === 'document' ? (
+                    /* DOCUMENT ATTACHMENT CARD */
+                    <div
+                      className={`p-3.5 rounded-2xl border flex items-center gap-3 min-w-[220px] shadow-xs ${
+                        isMe
+                          ? 'bg-zinc-950 text-white border-zinc-800'
+                          : 'bg-zinc-50 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white'
+                      }`}
+                    >
+                      <div className="w-10 h-10 rounded-xl bg-[#7F66FF] flex items-center justify-center text-white shrink-0 shadow-xs">
+                        <FileText className="w-5 h-5" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-xs sm:text-sm font-semibold truncate">
+                          {msg.attachment?.name || msg.content}
+                        </div>
+                        <div className="text-[10px] opacity-60 mt-0.5">
+                          {msg.attachment?.size || 'Document'} · {formatTimestamp(msg.timestamp)}
+                        </div>
+                      </div>
+                      {msg.attachment?.url && (
+                        <a
+                          href={msg.attachment.url}
+                          download={msg.attachment.name || 'document'}
+                          className="p-2 rounded-xl bg-white/10 hover:bg-white/20 transition-colors shrink-0"
+                          title="Download document"
+                        >
+                          <Download className="w-4 h-4" />
+                        </a>
+                      )}
+                    </div>
+                  ) : msg.type === 'audio' ? (
+                    /* AUDIO / VOICE NOTE PLAYER CARD */
+                    <div
+                      className={`p-3 rounded-2xl border flex items-center gap-3 min-w-[220px] shadow-xs ${
+                        isMe
+                          ? 'bg-zinc-950 text-white border-zinc-800'
+                          : 'bg-zinc-50 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white'
+                      }`}
+                    >
+                      <button
+                        type="button"
+                        onClick={() => togglePlayAudio(msg.id, msg.attachment?.url)}
+                        className="w-10 h-10 rounded-full bg-[#FF9500] flex items-center justify-center text-white shrink-0 hover:scale-105 active:scale-95 transition-transform shadow-xs"
+                      >
+                        {playingAudioId === msg.id ? (
+                          <Pause className="w-4 h-4" />
+                        ) : (
+                          <Play className="w-4 h-4 ml-0.5" />
+                        )}
+                      </button>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-1 h-5 mb-1">
+                          {[35, 70, 45, 90, 60, 30, 80, 100, 40, 75, 85, 40, 65, 95, 50, 30, 75].map((h, i) => (
+                            <span
+                              key={i}
+                              className={`w-1 rounded-full transition-all duration-150 ${
+                                playingAudioId === msg.id
+                                  ? 'bg-[#FF9500] animate-pulse'
+                                  : isMe
+                                  ? 'bg-zinc-500'
+                                  : 'bg-zinc-400'
+                              }`}
+                              style={{ height: `${h}%` }}
+                            />
+                          ))}
+                        </div>
+                        <div className="flex items-center justify-between text-[10px] opacity-60">
+                          <span>{msg.attachment?.duration || '0:12'}</span>
+                          <span>{formatTimestamp(msg.timestamp)}</span>
+                        </div>
+                      </div>
+                    </div>
+                  ) : msg.type === 'contact' ? (
+                    /* CONTACT CARD */
+                    <div
+                      className={`p-3.5 rounded-2xl border min-w-[220px] shadow-xs ${
+                        isMe
+                          ? 'bg-zinc-950 text-white border-zinc-800'
+                          : 'bg-zinc-50 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white'
+                      }`}
+                    >
+                      <div className="flex items-center gap-3 pb-2 border-b border-zinc-200/40 dark:border-white/10">
+                        <div className="w-10 h-10 rounded-full bg-[#00A8FF] flex items-center justify-center text-white font-bold text-sm shrink-0 shadow-xs">
+                          {msg.contact?.name?.[0]?.toUpperCase() || <User className="w-5 h-5" />}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="text-xs sm:text-sm font-bold truncate">{msg.contact?.name}</div>
+                          {msg.contact?.phone && (
+                            <div className="text-[11px] opacity-70 truncate">{msg.contact.phone}</div>
+                          )}
+                          {msg.contact?.email && (
+                            <div className="text-[10px] opacity-60 truncate">{msg.contact.email}</div>
+                          )}
+                        </div>
+                      </div>
+                      <div className="pt-2 flex items-center justify-between">
+                        <span className="text-[10px] opacity-60">{formatTimestamp(msg.timestamp)}</span>
+                        {msg.contact?.phone && (
+                          <a
+                            href={`tel:${msg.contact.phone}`}
+                            className="px-2.5 py-0.5 rounded-lg text-xs font-semibold bg-[#00A8FF]/20 text-[#00A8FF] hover:bg-[#00A8FF]/30 transition-colors"
+                          >
+                            Call
+                          </a>
+                        )}
+                      </div>
+                    </div>
+                  ) : msg.type === 'poll' ? (
+                    /* POLL CARD WITH REAL-TIME VOTING */
+                    <div
+                      className={`p-4 rounded-3xl border min-w-[260px] max-w-sm shadow-xs ${
+                        isMe
+                          ? 'bg-zinc-950 text-white border-zinc-800'
+                          : 'bg-zinc-50 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2 mb-2">
+                        <div className="w-6 h-6 rounded-full bg-[#FFC048] flex items-center justify-center text-zinc-950">
+                          <BarChart2 className="w-3.5 h-3.5" />
+                        </div>
+                        <span className="text-xs font-bold uppercase tracking-wider opacity-80">Poll</span>
+                      </div>
+                      <h4 className="text-sm font-bold mb-3">{msg.poll?.question}</h4>
+                      <div className="space-y-2">
+                        {msg.poll?.options.map((option) => {
+                          const totalVotes = msg.poll!.options.reduce((acc, opt) => acc + opt.votes.length, 0);
+                          const pct = totalVotes > 0 ? Math.round((option.votes.length / totalVotes) * 100) : 0;
+                          const hasVoted = option.votes.includes(currentUser.id);
+
+                          return (
+                            <button
+                              key={option.id}
+                              type="button"
+                              onClick={() => votePoll?.(msg.id, option.id)}
+                              className={`w-full relative overflow-hidden p-2.5 rounded-xl border text-left transition-all ${
+                                hasVoted
+                                  ? 'border-[#FFC048] ring-1 ring-[#FFC048]/50'
+                                  : 'border-zinc-200/50 dark:border-zinc-700/50 hover:bg-white/5'
+                              }`}
+                            >
+                              <div
+                                className="absolute inset-y-0 left-0 bg-[#FFC048]/25 transition-all duration-300"
+                                style={{ width: `${pct}%` }}
+                              />
+                              <div className="relative flex items-center justify-between text-xs font-medium z-10">
+                                <div className="flex items-center gap-2">
+                                  <div
+                                    className={`w-4 h-4 rounded-full border flex items-center justify-center ${
+                                      hasVoted ? 'bg-[#FFC048] border-[#FFC048] text-zinc-950' : 'border-zinc-400'
+                                    }`}
+                                  >
+                                    {hasVoted && <Check className="w-3 h-3 stroke-[3]" />}
+                                  </div>
+                                  <span>{option.text}</span>
+                                </div>
+                                <span className="text-[11px] font-mono opacity-80">
+                                  {pct}% ({option.votes.length})
+                                </span>
+                              </div>
+                            </button>
+                          );
+                        })}
+                      </div>
+                      <div className="mt-3 pt-2 border-t border-zinc-200/40 dark:border-white/10 flex items-center justify-between text-[10px] opacity-60">
+                        <span>
+                          {msg.poll?.options.reduce((acc, o) => acc + o.votes.length, 0) || 0} votes
+                          {msg.poll?.allowsMultipleAnswers ? ' · Multiple answers' : ' · Single choice'}
+                        </span>
+                        <span>{formatTimestamp(msg.timestamp)}</span>
+                      </div>
+                    </div>
+                  ) : msg.type === 'sticker' ? (
+                    /* STICKER MESSAGE */
+                    <div className="relative group/sticker">
+                      <div className="p-1 rounded-2xl transition-transform hover:scale-105">
+                        <img
+                          src={msg.stickerUrl}
+                          alt={msg.content || 'Sticker'}
+                          className="w-32 h-32 sm:w-36 sm:h-36 object-cover rounded-2xl shadow-md border border-zinc-200/50 dark:border-zinc-700/50"
+                        />
+                        {msg.content && msg.content !== 'Custom Sticker' && (
+                          <div className="mt-1 text-center text-xs font-semibold text-zinc-800 dark:text-zinc-200">
+                            {msg.content}
+                          </div>
+                        )}
+                        <div className="text-[10px] text-right opacity-60 mt-0.5">
+                          {formatTimestamp(msg.timestamp)}
+                        </div>
                       </div>
                     </div>
                   ) : (
@@ -622,7 +1015,6 @@ export const ChatPane: React.FC<ChatPaneProps> = ({
                       isMe ? 'right-0 -translate-x-2' : 'left-0 translate-x-2'
                     }`}
                   >
-                    {/* Common quick reactions */}
                     <button
                       type="button"
                       onClick={() => addReaction(msg.id, '❤️')}
@@ -640,7 +1032,6 @@ export const ChatPane: React.FC<ChatPaneProps> = ({
                       👍
                     </button>
 
-                    {/* Important Toggle */}
                     <button
                       type="button"
                       onClick={() => toggleImportantMessage(msg.id)}
@@ -652,7 +1043,6 @@ export const ChatPane: React.FC<ChatPaneProps> = ({
                       <Star className={`w-3.5 h-3.5 ${msg.isImportant ? 'fill-amber-500' : ''}`} />
                     </button>
 
-                    {/* Pin in chat Toggle */}
                     <button
                       type="button"
                       onClick={() => togglePinMessageInChat(msg.id)}
@@ -664,7 +1054,6 @@ export const ChatPane: React.FC<ChatPaneProps> = ({
                       <Pin className={`w-3.5 h-3.5 ${msg.isPinnedInChat ? 'fill-[#8B9A6E]' : ''}`} />
                     </button>
 
-                    {/* Delete Message */}
                     <button
                       type="button"
                       onClick={() => deleteMessage(msg.id)}
@@ -682,118 +1071,190 @@ export const ChatPane: React.FC<ChatPaneProps> = ({
         <div ref={messagesEndRef} className="h-0 w-0 -mt-3 pointer-events-none" />
       </div>
 
-      {/* 4. Message Input & Quick Action Bar */}
-      <div className="px-3 pt-2 pb-2.5 bg-[#F7F2EB]/95 dark:bg-[#1E231B]/95 border-t border-[#EAE2D6] dark:border-[#353E2F] backdrop-blur-md shrink-0">
-        {/* Quick Action Chips Row */}
-        <div className="flex items-center gap-1.5 pb-1.5 overflow-x-auto scrollbar-none text-xs">
-          <button
-            type="button"
-            onClick={onOpenExpenseModal}
-            className="px-3 py-1.5 rounded-xl border border-[#DFD6C7] dark:border-[#353E2F] bg-[#EEEEEE] dark:bg-[#252C21] text-[#586348] dark:text-[#C5CEB8] font-semibold flex items-center gap-1.5 hover:bg-[#EAE2D6] transition-colors shrink-0"
-          >
-            <Receipt className="w-3.5 h-3.5 text-[#8B9A6E]" />
-            <span>Add Expense</span>
-          </button>
+      {/* 4. WhatsApp-Style Input Message Bar (Matching Images 1, 2, 3) */}
+      <div className="px-3 pt-2 pb-3 bg-[#F7F2EB]/95 dark:bg-[#1E231B]/95 border-t border-[#EAE2D6] dark:border-[#353E2F] backdrop-blur-md shrink-0 relative z-30">
+        {/* Attachment Menu Popup (Image 2) */}
+        <AttachmentMenu
+          isOpen={showAttachmentMenu}
+          onClose={() => setShowAttachmentMenu(false)}
+          onSelectDocument={() => docInputRef.current?.click()}
+          onSelectPhotosVideos={() => mediaInputRef.current?.click()}
+          onSelectCamera={() => setShowCameraModal(true)}
+          onSelectAudio={() => audioInputRef.current?.click()}
+          onSelectContact={() => setShowContactModal(true)}
+          onSelectPoll={() => setShowPollModal(true)}
+          onSelectEvent={onOpenMeetingModal}
+          onSelectNewSticker={() => setShowEmojiStickerPicker(true)}
+          onSelectExpense={onOpenExpenseModal}
+        />
 
-          <button
-            type="button"
-            onClick={onOpenMeetingModal}
-            className="px-3 py-1.5 rounded-xl border border-[#DFD6C7] dark:border-[#353E2F] bg-[#EEEEEE] dark:bg-[#252C21] text-[#586348] dark:text-[#C5CEB8] font-semibold flex items-center gap-1.5 hover:bg-[#EAE2D6] transition-colors shrink-0"
-          >
-            <Calendar className="w-3.5 h-3.5 text-[#8B9A6E]" />
-            <span>Note Meeting</span>
-          </button>
+        {/* Emoji & Sticker Picker Popup (Image 3) */}
+        <EmojiStickerPicker
+          isOpen={showEmojiStickerPicker}
+          onClose={() => setShowEmojiStickerPicker(false)}
+          onSelectEmoji={addEmojiToInput}
+          onSelectSticker={(stk) => {
+            sendMessage({
+              content: stk.name,
+              type: 'sticker',
+              stickerUrl: stk.url,
+            });
+          }}
+          onUploadCustomSticker={(file) => {
+            handleCustomStickerUpload(file);
+          }}
+        />
 
-          <button
-            type="button"
-            onClick={() => setIsDraftImportant(!isDraftImportant)}
-            className={`px-3 py-1.5 rounded-xl border font-semibold flex items-center gap-1.5 transition-colors shrink-0 ${
-              isDraftImportant
-                ? 'border-[#8B9A6E] bg-[#8B9A6E]/15 text-[#586348] dark:text-[#EAF0DE]'
-                : 'border-[#DFD6C7] dark:border-[#353E2F] bg-[#EEEEEE] dark:bg-[#252C21] text-[#586348] dark:text-[#C5CEB8] hover:bg-[#EAE2D6]'
-            }`}
-          >
-            <Star className={`w-3.5 h-3.5 ${isDraftImportant ? 'fill-[#8B9A6E] text-[#8B9A6E]' : ''}`} />
-            <span>{isDraftImportant ? 'Important Flagged' : 'Mark Important'}</span>
-          </button>
+        {/* Hidden File Inputs for Attachment Menu */}
+        <input
+          ref={docInputRef}
+          type="file"
+          accept=".pdf,.doc,.docx,.txt,.zip,.csv,.xlsx"
+          onChange={handleDocumentUpload}
+          className="hidden"
+        />
+        <input
+          ref={mediaInputRef}
+          type="file"
+          accept="image/*,video/*"
+          onChange={handleMediaUpload}
+          className="hidden"
+        />
+        <input
+          ref={audioInputRef}
+          type="file"
+          accept="audio/*"
+          onChange={handleAudioUpload}
+          className="hidden"
+        />
+        <input
+          ref={stickerUploadRef}
+          type="file"
+          accept="image/*"
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (file) handleCustomStickerUpload(file);
+            e.target.value = '';
+          }}
+          className="hidden"
+        />
 
-          {/* Quick Partner Simulated Reply Chip */}
-          <button
-            type="button"
-            onClick={() => simulatePartnerReply()}
-            title={`Simulate an instant realistic reply from ${partnerUser.name}`}
-            className="px-3 py-1.5 rounded-xl border border-[#DFD6C7] dark:border-[#353E2F] bg-[#EEEEEE] dark:bg-[#252C21] text-[#586348] dark:text-[#C5CEB8] font-medium flex items-center gap-1.5 hover:bg-[#EAE2D6] transition-colors shrink-0"
-          >
-            <Sparkles className="w-3.5 h-3.5 text-[#8B9A6E]" />
-            <span>{partnerUser.name.split(' ')[0]} Replies...</span>
-          </button>
-        </div>
-
-        {/* Emoji Selector Popover */}
+        {/* Live Voice Speech Recognition Status Banner */}
         <AnimatePresence>
-          {showEmojiPicker && (
+          {isListening && (
             <motion.div
-              initial={{ opacity: 0, y: 10 }}
+              initial={{ opacity: 0, y: 6 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 10 }}
-              className="mb-2 p-2 rounded-2xl bg-[#F7F2EB] dark:bg-[#252C21] border border-[#EAE2D6] dark:border-[#353E2F] shadow-xl flex flex-wrap gap-1.5"
+              exit={{ opacity: 0, y: 6 }}
+              className="mb-2 px-3.5 py-1.5 rounded-2xl bg-red-500/10 border border-red-500/30 flex items-center justify-between text-xs text-red-600 dark:text-red-400"
             >
-              {COMMON_EMOJIS.map((emoji) => (
-                <button
-                  key={emoji}
-                  type="button"
-                  onClick={() => addEmojiToInput(emoji)}
-                  className="w-8 h-8 rounded-lg hover:bg-[#EAE2D6] dark:hover:bg-[#353E2F] text-lg flex items-center justify-center transition-transform hover:scale-110"
-                >
-                  {emoji}
-                </button>
-              ))}
+              <div className="flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-red-500 animate-ping" />
+                <span className="font-semibold">Listening to your voice... Speak now</span>
+              </div>
+              <button
+                type="button"
+                onClick={toggleVoiceAccess}
+                className="text-xs font-bold underline hover:opacity-80 cursor-pointer"
+              >
+                Done
+              </button>
             </motion.div>
           )}
         </AnimatePresence>
 
-        {/* Text Input Row */}
-        <form onSubmit={handleSend} className="flex items-end gap-2">
-          {/* Emoji Toggle */}
+        {/* Pill Container (Identical to Image 1) */}
+        <div className="w-full bg-white dark:bg-[#252C21] rounded-full shadow-xs border border-[#DFD6C7] dark:border-[#353E2F] px-3 py-1.5 flex items-center gap-2 transition-all focus-within:ring-2 focus-within:ring-[#8B9A6E]/30 focus-within:border-[#8B9A6E]">
+          {/* Attachment Button (Paperclip) */}
           <button
             type="button"
-            onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-            className={`p-2.5 rounded-xl transition-colors ${
-              showEmojiPicker
-                ? 'text-[#8B9A6E] bg-[#EAE2D6] dark:bg-[#252C21]'
-                : 'text-[#788566] hover:text-[#2D3325] dark:hover:text-white hover:bg-[#EAE2D6] dark:hover:bg-[#252C21]'
+            onClick={() => {
+              setShowAttachmentMenu((prev) => !prev);
+              setShowEmojiStickerPicker(false);
+            }}
+            className={`p-2 rounded-full transition-colors ${
+              showAttachmentMenu
+                ? 'text-[#8B9A6E] bg-[#EEEEEE] dark:bg-[#353E2F]'
+                : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200 hover:bg-[#EEEEEE] dark:hover:bg-[#353E2F]'
             }`}
+            title="Attach Document, Photo, Camera, Audio, Contact, Poll, Event..."
+          >
+            <Paperclip className="w-5 h-5 -rotate-45" />
+          </button>
+
+          {/* Emoji & Sticker Button (Image 3) */}
+          <button
+            type="button"
+            onClick={() => {
+              setShowEmojiStickerPicker((prev) => !prev);
+              setShowAttachmentMenu(false);
+            }}
+            className={`p-2 rounded-full transition-colors ${
+              showEmojiStickerPicker
+                ? 'text-[#8B9A6E] bg-[#EEEEEE] dark:bg-[#353E2F]'
+                : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200 hover:bg-[#EEEEEE] dark:hover:bg-[#353E2F]'
+            }`}
+            title="Emoji and Stickers"
           >
             <Smile className="w-5 h-5" />
           </button>
 
-          {/* Textarea */}
-          <div className="flex-1 relative">
-            <textarea
-              ref={textareaRef}
-              rows={1}
-              value={inputText}
-              onChange={handleTextareaInput}
-              onKeyDown={handleKeyDown}
-              placeholder={`Message #${activeChannel.name} as ${currentUser.name.split(' ')[0]}...`}
-              className="w-full px-4 py-2.5 rounded-2xl border border-[#DFD6C7] dark:border-[#353E2F] bg-[#EEEEEE] dark:bg-[#252C21] text-xs sm:text-sm text-[#2D3325] dark:text-[#F7F2EB] placeholder-[#8F9882] focus:outline-none focus:ring-2 focus:ring-[#8B9A6E]/40 resize-none max-h-32 transition-all leading-relaxed"
-            />
-          </div>
+          {/* Message Input Field: "Type a message" */}
+          <input
+            ref={inputRef}
+            type="text"
+            value={inputText}
+            onChange={(e) => setInputText(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                handleSend();
+              }
+            }}
+            placeholder="Type a message"
+            className="flex-1 bg-transparent border-0 outline-none text-sm text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 py-1.5 focus:ring-0 focus:outline-none"
+          />
 
-          {/* Send Button with Tactile Micro-animation */}
-          <motion.button
-            whileTap={{ scale: 0.92 }}
-            type="submit"
-            disabled={!inputText.trim()}
-            className={`p-2.5 rounded-2xl flex items-center justify-center transition-all shadow-md ${
-              inputText.trim()
-                ? 'bg-[#8B9A6E] hover:bg-[#79875F] text-white shadow-[#8B9A6E]/30'
-                : 'bg-[#EEEEEE] dark:bg-[#252C21] text-[#A7B395] cursor-not-allowed shadow-none'
-            }`}
-          >
-            <Send className="w-5 h-5" />
-          </motion.button>
-        </form>
+          {/* Right Action: Voice Access (Mic) or Send Button */}
+          {inputText.trim() ? (
+            <div className="flex items-center gap-1">
+              <button
+                type="button"
+                onClick={toggleVoiceAccess}
+                className={`p-2 rounded-full transition-colors ${
+                  isListening
+                    ? 'text-red-500 bg-red-100 dark:bg-red-950/40'
+                    : 'text-zinc-400 hover:text-zinc-600'
+                }`}
+                title="Voice Access (Speech to text)"
+              >
+                <Mic className="w-5 h-5" />
+              </button>
+              <button
+                type="button"
+                onClick={() => handleSend()}
+                className="p-2 rounded-full bg-[#8B9A6E] hover:bg-[#79875F] text-white shadow-xs transition-transform active:scale-95"
+                title="Send message"
+              >
+                <Send className="w-4 h-4 ml-0.5" />
+              </button>
+            </div>
+          ) : (
+            /* Voice Access Microphone Button (Image 1) */
+            <button
+              type="button"
+              onClick={toggleVoiceAccess}
+              className={`p-2 rounded-full transition-all active:scale-90 ${
+                isListening
+                  ? 'text-white bg-red-500 shadow-md animate-pulse'
+                  : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200 hover:bg-[#EEEEEE] dark:hover:bg-[#353E2F]'
+              }`}
+              title="Voice Access: Click to speak"
+            >
+              <Mic className="w-5 h-5" />
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Wallpaper & Background Photo Modal */}
@@ -802,6 +1263,27 @@ export const ChatPane: React.FC<ChatPaneProps> = ({
         onClose={() => setIsWallpaperModalOpen(false)}
         channelId={activeChannel.id}
         channelName={activeChannel.name}
+      />
+
+      {/* Contact Sharing Modal */}
+      <ContactModal
+        isOpen={showContactModal}
+        onClose={() => setShowContactModal(false)}
+        onSendContact={handleSendContact}
+      />
+
+      {/* Interactive Poll Modal */}
+      <PollModal
+        isOpen={showPollModal}
+        onClose={() => setShowPollModal(false)}
+        onSendPoll={handleSendPoll}
+      />
+
+      {/* Camera Capture Modal */}
+      <CameraModal
+        isOpen={showCameraModal}
+        onClose={() => setShowCameraModal(false)}
+        onCapturePhoto={handleCameraCapture}
       />
     </div>
   );
