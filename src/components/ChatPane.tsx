@@ -638,64 +638,66 @@ export const ChatPane: React.FC<ChatPaneProps> = ({
                 <div className="relative max-w-[85%] sm:max-w-md group/bubble">
                   {/* EXPENSE MESSAGE CARD */}
                   {msg.type === 'expense' && msg.expense ? (
-                    <div
-                      className={`p-4 rounded-3xl border shadow-sm transition-all ${
-                        msg.expense.isSettled
-                          ? 'bg-zinc-100/90 dark:bg-zinc-900/90 border-zinc-200 dark:border-zinc-800 opacity-80'
-                          : isMe
-                          ? 'bg-zinc-950 text-white border-zinc-800 shadow-sm'
-                          : 'bg-zinc-50 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white'
-                      }`}
-                    >
-                      <div className="flex items-center justify-between gap-2 pb-2 border-b border-zinc-200/40 dark:border-white/10">
+                    <div className="p-3.5 sm:p-4 rounded-2xl bg-white text-zinc-950 border border-zinc-200/90 shadow-md shadow-black/10 transition-all select-text min-w-[250px] sm:min-w-[280px]">
+                      {/* Header: Category & Settled/Pending Badge */}
+                      <div className="flex items-center justify-between gap-2 pb-2 border-b border-zinc-200/80">
                         <div className="flex items-center gap-1.5">
-                          <Receipt className={`w-4 h-4 ${isMe ? 'text-zinc-300' : 'text-zinc-700 dark:text-zinc-300'}`} />
-                          <span className="text-xs font-semibold uppercase tracking-wider opacity-80">
+                          <div className="w-5.5 h-5.5 rounded-md bg-zinc-100 border border-zinc-200/80 flex items-center justify-center text-black shrink-0">
+                            <Receipt className="w-3.5 h-3.5 text-black stroke-[2.2]" />
+                          </div>
+                          <span className="text-[11px] font-bold uppercase tracking-wider text-black">
                             {msg.expense.category}
                           </span>
                         </div>
                         {msg.expense.isSettled ? (
-                          <span className="px-2 py-0.5 rounded-full bg-zinc-200 dark:bg-zinc-800 text-[10px] font-semibold text-zinc-600 dark:text-zinc-400">
-                            Settled
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-950 border border-emerald-300/80 text-[10px] font-bold tracking-wide">
+                            <Check className="w-2.5 h-2.5 text-emerald-800 stroke-[2.5]" />
+                            <span>Settled</span>
                           </span>
                         ) : (
-                          <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${
-                            isMe ? 'bg-white/20 text-white' : 'bg-black/10 dark:bg-white/20 text-black dark:text-white'
-                          }`}>
-                            Pending
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-50 text-amber-950 border border-amber-300/80 text-[10px] font-bold tracking-wide">
+                            <Clock className="w-2.5 h-2.5 text-amber-800 stroke-[2.5]" />
+                            <span>Pending</span>
                           </span>
                         )}
                       </div>
 
+                      {/* Body: Title, Amount, Split & Payer Info */}
                       <div className="my-2.5">
-                        <div className="text-sm font-semibold">{msg.expense.title}</div>
-                        <div className={`text-2xl font-bold font-mono tabular-nums mt-1 ${
-                          isMe ? 'text-white' : 'text-zinc-900 dark:text-white'
-                        }`}>
-                          {msg.expense.currency === '$' ? '₹' : (msg.expense.currency || '₹')}
-                          {msg.expense.amount.toFixed(2)}
+                        <div className="text-xs sm:text-sm font-bold text-black leading-snug">
+                          {msg.expense.title}
                         </div>
-                        <div className="text-[11px] opacity-75 mt-1">
-                          Paid by {msg.expense.paidBy === 'alex' ? 'Alex' : 'Jordan'} ·{' '}
-                          {msg.expense.splitType === 'equally'
-                            ? `Split equally (${msg.expense.currency === '$' ? '₹' : (msg.expense.currency || '₹')}${(msg.expense.amount / 2).toFixed(2)} each)`
-                            : 'Direct non-split'}
+                        <div className="text-xl sm:text-2xl font-black font-mono tabular-nums text-black mt-1 tracking-tight flex items-baseline gap-1">
+                          <span>
+                            {msg.expense.currency === '$' ? '₹' : (msg.expense.currency || '₹')}
+                            {msg.expense.amount.toFixed(2)}
+                          </span>
+                        </div>
+                        <div className="text-[11px] sm:text-xs font-medium text-zinc-800 mt-1.5 flex items-center gap-1.5 flex-wrap">
+                          <span className="font-bold text-black">
+                            Paid by {msg.expense.paidBy === 'alex' ? 'Alex' : 'Jordan'}
+                          </span>
+                          <span className="text-zinc-400">·</span>
+                          <span className="text-zinc-600">
+                            {msg.expense.splitType === 'equally'
+                              ? `Split equally (${msg.expense.currency === '$' ? '₹' : (msg.expense.currency || '₹')}${(msg.expense.amount / 2).toFixed(2)} each)`
+                              : 'Direct non-split'}
+                          </span>
                         </div>
                       </div>
 
-                      <div className="pt-2 border-t border-zinc-200/40 dark:border-white/10 flex items-center justify-between">
-                        <span className="text-[10px] opacity-60">
+                      {/* Footer: Timestamp & Action Button */}
+                      <div className="pt-2.5 border-t border-zinc-200/80 flex items-center justify-between gap-2">
+                        <span className="text-[10px] sm:text-[11px] font-medium text-zinc-500">
                           {formatTimestamp(msg.timestamp)}
                         </span>
                         <button
                           type="button"
                           onClick={() => markExpenseSettled(msg.id)}
-                          className={`px-3 py-1 rounded-xl text-xs font-medium transition-all ${
+                          className={`px-3 py-1 rounded-lg text-xs font-bold transition-all shadow-xs active:scale-95 cursor-pointer ${
                             msg.expense.isSettled
-                              ? 'bg-zinc-200 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-300 dark:hover:bg-zinc-700'
-                              : isMe
-                              ? 'bg-white hover:bg-zinc-200 text-zinc-950 font-semibold shadow-xs'
-                              : 'bg-zinc-900 hover:bg-zinc-800 text-white dark:bg-white dark:hover:bg-zinc-200 dark:text-zinc-950 font-semibold shadow-xs'
+                              ? 'bg-zinc-100 hover:bg-zinc-200 text-black border border-zinc-300 hover:border-zinc-400'
+                              : 'bg-black hover:bg-zinc-800 text-white hover:shadow-xs'
                           }`}
                         >
                           {msg.expense.isSettled ? 'Mark Unsettled' : 'Mark Settled'}
@@ -958,7 +960,7 @@ export const ChatPane: React.FC<ChatPaneProps> = ({
                   ) : (
                     /* STANDARD TEXT MESSAGE BUBBLE */
                     <div
-                      className={`px-4 py-2.5 rounded-2xl text-xs sm:text-sm leading-relaxed shadow-xs ${
+                      className={`px-4.5 py-3 rounded-2xl text-sm sm:text-base leading-relaxed shadow-xs ${
                         isMe
                           ? 'bg-zinc-950 text-white dark:bg-white dark:text-zinc-950 rounded-br-xs'
                           : 'bg-zinc-100 dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 border border-zinc-200 dark:border-zinc-800 rounded-bl-xs'
@@ -967,7 +969,7 @@ export const ChatPane: React.FC<ChatPaneProps> = ({
                       <p className="whitespace-pre-wrap break-words">{msg.content}</p>
 
                       <div
-                        className={`flex items-center justify-end gap-1 text-[10px] mt-1 ${
+                        className={`flex items-center justify-end gap-1.5 text-xs mt-1.5 ${
                           isMe ? 'text-zinc-400 dark:text-zinc-600' : 'text-zinc-400'
                         }`}
                       >
@@ -975,9 +977,9 @@ export const ChatPane: React.FC<ChatPaneProps> = ({
                         {isMe && (
                           <span>
                             {msg.status === 'read' ? (
-                              <CheckCheck className="w-3.5 h-3.5 text-white dark:text-zinc-950" />
+                              <CheckCheck className="w-4 h-4 text-white dark:text-zinc-950" />
                             ) : (
-                              <Check className="w-3.5 h-3.5" />
+                              <Check className="w-4 h-4" />
                             )}
                           </span>
                         )}

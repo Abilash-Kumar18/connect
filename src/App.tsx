@@ -21,10 +21,10 @@ import { ProfilePage } from './pages/ProfilePage';
 import { SplashPage } from './pages/SplashPage';
 
 function RootRedirect() {
-  const { activeChannelId } = useConnect();
+  const { activeChannelId, isAuthenticated } = useConnect();
   const hasSeenSplash = Boolean(sessionStorage.getItem('connect_splash_seen'));
 
-  if (!hasSeenSplash) {
+  if (!hasSeenSplash || !isAuthenticated) {
     return <SplashPage />;
   }
   return <Navigate to={`/channels/${activeChannelId || 'chan_general'}`} replace />;
