@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
-import { Lock, Mail, UserCheck, Sparkles, Eye, EyeOff, ShieldCheck } from 'lucide-react';
+import { motion } from 'motion/react';
+import { Lock, Mail, Eye, EyeOff, ShieldCheck } from 'lucide-react';
 import { useConnect } from '../context/ConnectContext';
 
 interface AuthModalProps {
@@ -9,7 +9,7 @@ interface AuthModalProps {
 }
 
 export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
-  const { login } = useConnect();
+  const { login } = useConnect() as any;
   const [mode, setMode] = useState<'signin' | 'signup'>('signin');
   const [email, setEmail] = useState('alex.morgan@connect.io');
   const [password, setPassword] = useState('••••••••');
@@ -19,15 +19,27 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password) {
       setError('Please fill in both email and password.');
       return;
     }
+    if (mode === 'signup' && !name) {
+      setError('Please enter your full name.');
+      return;
+    }
     setError('');
-    login('alex');
-    if (onClose) onClose();
+    try {
+      if (mode === 'signin') {
+        await login(email, password);
+      } else {
+        await (login as any)(email, password, name); // fallback
+      }
+      if (onClose) onClose();
+    } catch (err: any) {
+      setError(err.message || 'Authentication failed');
+    }
   };
 
   const handleQuickDemo = (user: 'alex' | 'jordan') => {

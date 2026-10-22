@@ -20,7 +20,7 @@ const port = parseInt(process.env.PORT || '3000', 10);
 
 const io = new Server(server, {
   cors: {
-    origin: process.env.NODE_ENV === 'production' ? false : ['http://localhost:3000'],
+    origin: process.env.NODE_ENV === 'production' ? false : ['http://localhost:3000', 'http://127.0.0.1:3000'],
     methods: ['GET', 'POST'],
   },
 });
@@ -48,4 +48,4 @@ server.listen(port, '0.0.0.0', () => {
   console.log(`CONNECT server running on port ${port}`);
 });
 
-export { app, io, server };
+export { app, io };
