@@ -14,6 +14,7 @@ import {
 } from '../types';
 import { INITIAL_USERS, INITIAL_CHANNELS, INITIAL_MESSAGES } from '../data/seedData';
 import { StickerItem, INITIAL_STICKERS } from '../data/stickersData';
+import { apiService } from '../services/api.ts';
 
 interface ConnectContextType {
   currentUser: User;
@@ -71,7 +72,8 @@ interface ConnectContextType {
   soundEnabled: boolean;
   toggleSound: () => void;
   isAuthenticated: boolean;
-  login: (asUser?: 'alex' | 'jordan' | string, customProfile?: { name?: string; role?: string }) => void;
+  login: (emailOrUser: string | 'alex' | 'jordan', password?: string) => Promise<void>;
+  signup: (email: string, password: string, name: string) => Promise<void>;
   logout: () => void;
   isMobileDrawerOpen: boolean;
   setIsMobileDrawerOpen: (open: boolean) => void;
@@ -893,29 +895,38 @@ export const ConnectProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const toggleDarkMode = () => setDarkMode((prev) => !prev);
   const toggleSound = () => setSoundEnabled((prev) => !prev);
 
-  const login = (asUser: string = 'alex', customProfile?: { name?: string; role?: string }) => {
-    if (customProfile?.name) {
-      setUsers((prev) => ({
-        ...prev,
-        [asUser]: {
-          id: asUser,
-          name: customProfile.name || (asUser === 'jordan' ? 'Jordan Lee' : 'Alex Morgan'),
-          handle: `@${(customProfile.name || asUser).toLowerCase().replace(/\s+/g, '')}`,
-          avatar: asUser === 'jordan'
-            ? 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80'
-            : 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80',
-          statusText: '',
-          statusState: 'online',
-          role: customProfile.role || 'Duo Partner',
-        },
-      }));
+  const login = async (emailOrUser: string | 'alex' | 'jordan' = 'alex', password?: string, name?: string) => {
+    try {
+      if (typeof emailOrUser === 'string' && emailOrUser.includes('@')) {
+        if (password) {
+          if (name) {
+            await apiService.register(emailOrUser, password, name);
+          } else {
+            await apiService.login(emailOrUser, password);
+          }
+          setIsAuthenticated(true);
+          if (soundEnabled) playSoundEffect('settle');
+          return;
+        }
+      }
+      const asUser = (emailOrUser as 'alex' | 'jordan') || 'alex';
+      setCurrentUserIdState(asUser);
+      setIsAuthenticated(true);
+      if (soundEnabled) playSoundEffect('settle');
+      return;
+    } catch (error) {
+      throw error;
     }
-    setCurrentUserIdState(asUser);
+  };
+
+  const signup = async (email: string, password: string, name: string) => {
+    await apiService.register(email, password, name);
     setIsAuthenticated(true);
     if (soundEnabled) playSoundEffect('settle');
   };
 
   const logout = () => {
+    apiService.logout();
     setIsAuthenticated(false);
   };
 
@@ -1000,6 +1011,7 @@ export const ConnectProvider: React.FC<{ children: React.ReactNode }> = ({ child
     toggleSound,
     isAuthenticated,
     login,
+    signup,
     logout,
     isMobileDrawerOpen,
     setIsMobileDrawerOpen,
