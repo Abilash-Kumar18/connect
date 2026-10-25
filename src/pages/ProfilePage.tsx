@@ -31,6 +31,7 @@ export const ProfilePage: React.FC = () => {
     toggleSound,
     resetToDefaults,
     setIsMobileDrawerOpen,
+    logout,
   } = useConnect();
   const navigate = useNavigate();
 
@@ -264,6 +265,22 @@ export const ProfilePage: React.FC = () => {
               </div>
               <div className="p-2 rounded-xl bg-red-50 dark:bg-red-950/50 text-red-600 group-hover:rotate-180 transition-transform duration-300">
                 <RotateCcw className="w-4 h-4" />
+              </div>
+            </button>
+
+            <button
+              onClick={() => {
+                logout();
+                navigate('/');
+              }}
+              className="p-4 rounded-2xl border border-[#DFD6C7] dark:border-[#353E2F] hover:border-[#8B9A6E] flex items-center justify-between transition-colors text-left group bg-[#F7F2EB]/50 dark:bg-[#1E231B]"
+            >
+              <div>
+                <div className="text-xs font-bold text-[#2D3325] dark:text-[#F7F2EB]">Sign Out</div>
+                <div className="text-[11px] text-[#8F9882]">Log out of your account</div>
+              </div>
+              <div className="p-2 rounded-xl bg-[#EEEEEE] dark:bg-[#252C21] text-[#586348] dark:text-[#C5CEB8] group-hover:bg-[#8B9A6E]/10 group-hover:text-[#8B9A6E] transition-colors">
+                <LogOut className="w-4 h-4" />
               </div>
             </button>
           </div>
