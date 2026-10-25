@@ -899,10 +899,26 @@ export const ConnectProvider: React.FC<{ children: React.ReactNode }> = ({ child
     try {
       if (typeof emailOrUser === 'string' && emailOrUser.includes('@')) {
         if (password) {
+          let result;
           if (name) {
-            await apiService.register(emailOrUser, password, name);
+            result = await apiService.register(emailOrUser, password, name);
           } else {
-            await apiService.login(emailOrUser, password);
+            result = await apiService.login(emailOrUser, password);
+          }
+          if (result?.user) {
+            setUsers((prev) => ({
+              ...prev,
+              [result.user.id]: {
+                id: result.user.id,
+                name: result.user.name || name || result.user.email?.split('@')[0],
+                handle: result.user.email ? `@${result.user.email.split('@')[0]}` : '@user',
+                avatar: result.user.avatar_url || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80',
+                statusText: result.user.status_text || '',
+                statusState: result.user.status_state || 'online',
+                role: result.user.role || 'User',
+              },
+            }));
+            setCurrentUserIdState(result.user.id);
           }
           setIsAuthenticated(true);
           if (soundEnabled) playSoundEffect('settle');
@@ -920,7 +936,22 @@ export const ConnectProvider: React.FC<{ children: React.ReactNode }> = ({ child
   };
 
   const signup = async (email: string, password: string, name: string) => {
-    await apiService.register(email, password, name);
+    const result = await apiService.register(email, password, name);
+    if (result?.user) {
+      setUsers((prev) => ({
+        ...prev,
+        [result.user.id]: {
+          id: result.user.id,
+          name: result.user.name || name,
+          handle: `@${email.split('@')[0]}`,
+          avatar: result.user.avatar_url || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80',
+          statusText: result.user.status_text || '',
+          statusState: result.user.status_state || 'online',
+          role: result.user.role || 'User',
+        },
+      }));
+      setCurrentUserIdState(result.user.id);
+    }
     setIsAuthenticated(true);
     if (soundEnabled) playSoundEffect('settle');
   };
