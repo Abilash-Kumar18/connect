@@ -192,7 +192,9 @@ export const ConnectProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
     const saved = localStorage.getItem(STORAGE_KEYS.AUTH);
-    return saved !== null ? saved === 'true' : true;
+    const token = localStorage.getItem('connect_auth_token');
+    if (token) return true;
+    return saved !== null ? saved === 'true' : false;
   });
 
   // Users state
@@ -213,6 +215,8 @@ export const ConnectProvider: React.FC<{ children: React.ReactNode }> = ({ child
   });
 
   const [currentUserId, setCurrentUserIdState] = useState<string>(() => {
+    const token = localStorage.getItem('connect_auth_token');
+    if (token) return localStorage.getItem(STORAGE_KEYS.ACTIVE_USER) || 'user';
     return localStorage.getItem(STORAGE_KEYS.ACTIVE_USER) || 'alex';
   });
 
