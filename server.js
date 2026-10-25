@@ -8,6 +8,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import compression from 'compression';
+import apiRoutes from './server/routes/index.ts';
 
 dotenv.config();
 
@@ -31,6 +32,8 @@ app.use(compression());
 app.use(morgan('dev'));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
+
+app.use('/api', apiRoutes);
 
 app.get('/healthz', (_req, res) => res.json({ status: 'ok', timestamp: Date.now() }));
 app.get('/api/health', (_req, res) => res.json({ status: 'healthy', service: 'connect-api' }));
