@@ -147,6 +147,4 @@ connect-main/
 6. **Phase 6: File Storage** - Supabase Storage integration for media uploads
 7. **Phase 7: Final Integration & Testing** - End-to-end testing and optimization
 
-## License
 
-Apache-2.0 (see LICENSE file)
