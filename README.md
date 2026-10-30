@@ -17,8 +17,7 @@ Managing conversations between friends can get messy when everything lives in a 
 - **Socket.io Client** - Bi-directional real-time WebSocket communication
 - **React Router DOM 7.18.4** - Client-side routing
 - **Tailwind CSS 4.3.3** - Styling
-- **Motion (Framer Motion v12)** - UI animations
-- **Lucide React** - Icon library
+
 
 ### Backend & Real-Time Engine
 - **Node.js & Express.js 4.21.2** - REST API & HTTP server framework
@@ -43,11 +42,9 @@ Managing conversations between friends can get messy when everything lives in a 
   - **Delta Sync on Reconnect**: Synchronizes only missed messages since `last_synced_message_id` upon network restoration
   - **Ephemeral Presence via Redis**: Real-time typing indicators per channel and live online/offline status
 - **Expense & Payment Ledger**: Track shared expenses, splits, and settlements with real-time balance recalculation
-- **Polymorphic Rich Messaging**: Supports text, images, college print PDFs, audio notes, interactive polls, contacts, stickers, expenses, and meeting cards
 - **Multi-Tab & Multi-Device Sync**: Synchronizes state across browser tabs (`BroadcastChannel`) and devices (`Socket.io` rooms)
 - **Notes Hub**: Centralized view of starred/important messages and pinned content across all channels
 - **Custom Theming**: Dark/Light mode and per-channel custom chat wallpapers
-- **Secure Private Chat**: Designed exclusively for friends to maintain focused, private communication spaces
 
 ## Getting Started
 
