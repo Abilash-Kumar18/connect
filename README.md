@@ -59,7 +59,7 @@ npm install
 ```
 
 ### Environment Setup
-Create a `.env.local` file in the root directory:
+Copy `.env.example` to `.env` in the root directory and fill in your values:
 ```env
 # Server Config
 PORT=3000
@@ -80,6 +80,7 @@ JWT_EXPIRES_IN=7d
 # Client Config (exposed)
 VITE_SUPABASE_URL=your_supabase_url
 VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+VITE_API_URL=/api
 VITE_SOCKET_URL=http://localhost:3000
 ```
 
@@ -87,9 +88,10 @@ VITE_SOCKET_URL=http://localhost:3000
 
 #### Development (Frontend + Backend with Hot Reload)
 ```bash
-npm run dev
+npm run dev        # Vite frontend on http://localhost:3000
+npm run dev:server # Express + Socket.io backend with watch mode
 ```
-This starts both the Vite dev server and the Socket.io-enabled Express backend.
+Run each command in a separate terminal.
 
 #### Production Build & Serve
 ```bash
@@ -115,23 +117,24 @@ connect-main/
 │   ├── context/           # React Context (ConnectContext - state management)
 │   ├── data/              # Seed data (users, channels, messages, stickers)
 │   ├── pages/             # Route pages (ChannelPage, NotesPage, etc.)
+│   ├── services/          # API client and service helpers
 │   ├── types/             # TypeScript type definitions
-│   ├── utils/             # Utility functions (socket, api helpers, etc.)
 │   ├── App.tsx            # Main app with routing
 │   ├── main.tsx           # Entry point
 │   └── index.css          # Global styles
-├── server/               # Backend source (to be implemented)
-│   ├── config/           # DB, Redis, Supabase config
-│   ├── controllers/      # REST API controllers
-│   ├── middlewares/      # Auth, error handling, validation
-│   ├── models/           # Database schema & types
-│   ├── routes/           # API routes
-│   ├── sockets/          # Socket.io event handlers
-│   └── utils/            # Backend utilities
-├── public/               # Static assets
-├── dist/                 # Build output (after build)
-├── server.js             # Express + Socket.io server entry (current base)
-└── README.md             # This file
+├── server/                # Backend source
+│   ├── index.ts           # Express + Socket.io server entry
+│   ├── config/            # DB, Redis, Supabase config
+│   ├── controllers/       # REST API controllers
+│   ├── middlewares/       # Auth, error handling, validation
+│   ├── models/            # Database schema & types
+│   ├── routes/            # API routes
+│   ├── sockets/           # Socket.io event handlers
+│   └── utils/             # Backend utilities
+├── public/                # Static assets
+├── dist/                  # Build output (after build)
+├── .env.example           # Environment variable template
+└── README.md              # This file
 ```
 
 ## Implementation Roadmap
