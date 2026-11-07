@@ -1,16 +1,14 @@
+import 'dotenv/config';
 import express from 'express';
 import http from 'http';
 import { Server } from 'socket.io';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import dotenv from 'dotenv';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import compression from 'compression';
-import apiRoutes from './server/routes/index.ts';
-
-dotenv.config();
+import apiRoutes from './routes/index';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -21,7 +19,7 @@ const port = parseInt(process.env.PORT || '3000', 10);
 
 const io = new Server(server, {
   cors: {
-    origin: process.env.NODE_ENV === 'production' ? false : ['http://localhost:3000', 'http://127.0.0.1:3000'],
+    origin: process.env.NODE_ENV === 'production' ? false : ['http://localhost:3000'],
     methods: ['GET', 'POST'],
   },
 });
@@ -33,12 +31,11 @@ app.use(morgan('dev'));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
-app.use('/api', apiRoutes);
-
 app.get('/healthz', (_req, res) => res.json({ status: 'ok', timestamp: Date.now() }));
 app.get('/api/health', (_req, res) => res.json({ status: 'healthy', service: 'connect-api' }));
+app.use('/api', apiRoutes);
 
-const distPath = path.resolve(__dirname, 'dist');
+const distPath = path.resolve(__dirname, '..', 'dist');
 app.use(express.static(distPath));
 app.get('*', (_req, res) => res.sendFile(path.resolve(distPath, 'index.html')));
 

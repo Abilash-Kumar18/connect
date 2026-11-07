@@ -202,5 +202,5 @@ VITE_SOCKET_URL=http://localhost:3000
 After completing setup above:
 1. Verify database tables created in Supabase Table Editor
 2. Test Redis connection
-3. We'll proceed to update `server.js` with Socket.io integration
+3. We'll proceed to update `server/index.ts` with Socket.io integration
 4. Create authentication middleware and Socket.io event handlers
